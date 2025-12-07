@@ -177,3 +177,39 @@ func (c *AuthController) GoogleCallback(ctx *fiber.Ctx) error {
 
 	return response.Success(ctx, result)
 }
+
+// RefreshToken godoc
+// @Summary		Refresh access token
+// @Description	Get new access token using refresh token
+// @Tags		Auth
+// @Accept		json
+// @Produce		json
+// @Param		body	body		dto.RefreshTokenRequest	true	"Refresh token"
+// @Success		200		{object}	dto.LoginResponse
+// @Failure		400		{object}	response.ErrorEnvelope
+// @Failure		401		{object}	response.ErrorEnvelope
+// @Router		/auth/refresh [post]
+func (c *AuthController) RefreshToken(ctx *fiber.Ctx) error {
+	var req dto.RefreshTokenRequest
+
+	if err := ctx.BodyParser(&req); err != nil {
+		return response.BadRequest(ctx, constants.GetStatusMessage(constants.StatusInvalidJSON))
+	}
+
+	if err := c.validate.Struct(&req); err != nil {
+		return response.BadRequest(ctx, "Refresh token is required")
+	}
+
+	result, err := c.authService.RefreshToken(req.RefreshToken)
+	if err != nil {
+		if errors.Is(err, services.ErrInvalidRefreshToken) {
+			return response.Error(ctx,
+				constants.GetHTTPStatus(constants.StatusTokenInvalid),
+				"Invalid or expired refresh token",
+			)
+		}
+		return response.InternalError(ctx, "Failed to refresh token")
+	}
+
+	return response.Success(ctx, result)
+}

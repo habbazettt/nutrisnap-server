@@ -14,15 +14,17 @@ import (
 )
 
 var (
-	ErrEmailAlreadyExists = errors.New("email already exists")
-	ErrInvalidCredentials = errors.New("invalid credentials")
-	ErrUserNotFound       = errors.New("user not found")
-	ErrOAuthFailed        = errors.New("OAuth authentication failed")
+	ErrEmailAlreadyExists  = errors.New("email already exists")
+	ErrInvalidCredentials  = errors.New("invalid credentials")
+	ErrUserNotFound        = errors.New("user not found")
+	ErrOAuthFailed         = errors.New("OAuth authentication failed")
+	ErrInvalidRefreshToken = errors.New("invalid refresh token")
 )
 
 type AuthService interface {
 	Register(req *dto.RegisterRequest) (*dto.RegisterResponse, error)
 	Login(req *dto.LoginRequest) (*dto.LoginResponse, error)
+	RefreshToken(refreshToken string) (*dto.LoginResponse, error)
 	GetGoogleAuthURL(state string) string
 	GoogleCallback(ctx context.Context, code string) (*dto.LoginResponse, error)
 }
@@ -172,6 +174,24 @@ func (s *authService) generateTokenResponse(user *models.User) (*dto.LoginRespon
 		RefreshToken: refreshToken,
 		ExpiresAt:    expiresAt,
 	}, nil
+}
+
+// RefreshToken validates refresh token and generates new access/refresh tokens
+func (s *authService) RefreshToken(refreshToken string) (*dto.LoginResponse, error) {
+	// Validate refresh token
+	userID, err := s.jwtManager.ValidateRefreshToken(refreshToken)
+	if err != nil {
+		return nil, ErrInvalidRefreshToken
+	}
+
+	// Get user
+	user, err := s.userRepo.FindByID(userID)
+	if err != nil {
+		return nil, ErrUserNotFound
+	}
+
+	// Generate new tokens
+	return s.generateTokenResponse(user)
 }
 
 func (s *authService) toUserResponse(user *models.User) dto.UserResponse {

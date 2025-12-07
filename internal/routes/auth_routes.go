@@ -17,7 +17,6 @@ func SetupAuthRoutes(v1 fiber.Router, authController *controllers.AuthController
 	auth.Get("/google", authController.GoogleLogin)
 	auth.Get("/google/callback", authController.GoogleCallback)
 
-	// TODO: Implement later
-	// auth.Post("/refresh", authController.RefreshToken)
-	// auth.Post("/logout", authController.Logout)
+	// Refresh token
+	auth.Post("/refresh", authController.RefreshToken)
 }

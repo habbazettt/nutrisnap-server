@@ -44,6 +44,7 @@ Tujuan: menyediakan autentikasi aman dan modern, sekelas aplikasi production.
 * [x] Implementasi Google OAuth2 login
 * [x] Model OAuthAccount + relasi ke User
 * [x] Role-based access (user, admin)
+* [x] Refresh token
 
 ---
 
