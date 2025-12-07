@@ -12,12 +12,14 @@ type Config struct {
 	Database DatabaseConfig
 	MinIO    MinIOConfig
 	JWT      JWTConfig
+	Google   GoogleOAuthConfig
 }
 
 type ServerConfig struct {
 	Port        string
 	Environment string
 	LogLevel    string
+	BaseURL     string
 }
 
 type DatabaseConfig struct {
@@ -46,6 +48,12 @@ type JWTConfig struct {
 	Issuer        string
 }
 
+type GoogleOAuthConfig struct {
+	ClientID     string
+	ClientSecret string
+	RedirectURL  string
+}
+
 var cfg *Config
 
 func Load() (*Config, error) {
@@ -54,6 +62,7 @@ func Load() (*Config, error) {
 			Port:        getEnv("PORT", "3000"),
 			Environment: getEnv("ENV", "development"),
 			LogLevel:    getEnv("LOG_LEVEL", "info"),
+			BaseURL:     getEnv("BASE_URL", "http://localhost:3000"),
 		},
 		Database: DatabaseConfig{
 			Host:     getEnv("DB_HOST", ""),
@@ -77,6 +86,11 @@ func Load() (*Config, error) {
 			AccessExpiry:  getEnvDuration("JWT_ACCESS_EXPIRY", 30*time.Minute),
 			RefreshExpiry: getEnvDuration("JWT_REFRESH_EXPIRY", 7*24*time.Hour),
 			Issuer:        getEnv("JWT_ISSUER", "nutrisnap-api"),
+		},
+		Google: GoogleOAuthConfig{
+			ClientID:     getEnv("GOOGLE_CLIENT_ID", ""),
+			ClientSecret: getEnv("GOOGLE_CLIENT_SECRET", ""),
+			RedirectURL:  getEnv("GOOGLE_REDIRECT_URL", "http://localhost:3000/api/v1/auth/google/callback"),
 		},
 	}
 

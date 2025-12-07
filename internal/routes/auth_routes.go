@@ -13,8 +13,11 @@ func SetupAuthRoutes(v1 fiber.Router, authController *controllers.AuthController
 	auth.Post("/register", authController.Register)
 	auth.Post("/login", authController.Login)
 
-	// Will be implemented next
-	// auth.Post("/oauth/google", authController.GoogleOAuth)
+	// Google OAuth
+	auth.Get("/google", authController.GoogleLogin)
+	auth.Get("/google/callback", authController.GoogleCallback)
+
+	// TODO: Implement later
 	// auth.Post("/refresh", authController.RefreshToken)
 	// auth.Post("/logout", authController.Logout)
 }

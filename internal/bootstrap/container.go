@@ -7,12 +7,16 @@ import (
 	"github.com/habbazettt/nutrisnap-server/internal/services"
 	"github.com/habbazettt/nutrisnap-server/pkg/database"
 	"github.com/habbazettt/nutrisnap-server/pkg/jwt"
+	"github.com/habbazettt/nutrisnap-server/pkg/oauth"
 )
 
 // Container holds all dependencies
 type Container struct {
 	// JWT
 	JWTManager *jwt.Manager
+
+	// OAuth
+	GoogleOAuth *oauth.GoogleOAuth
 
 	// Repositories
 	UserRepo repositories.UserRepository
@@ -39,11 +43,18 @@ func NewContainer() *Container {
 		Issuer:        cfg.JWT.Issuer,
 	})
 
+	// Initialize Google OAuth
+	googleOAuth := oauth.NewGoogleOAuth(oauth.Config{
+		ClientID:     cfg.Google.ClientID,
+		ClientSecret: cfg.Google.ClientSecret,
+		RedirectURL:  cfg.Google.RedirectURL,
+	})
+
 	// Initialize repositories
 	userRepo := repositories.NewUserRepository(db)
 
 	// Initialize services
-	authService := services.NewAuthService(userRepo, jwtManager)
+	authService := services.NewAuthService(userRepo, jwtManager, googleOAuth)
 	userService := services.NewUserService(userRepo)
 
 	// Initialize controllers
@@ -52,6 +63,7 @@ func NewContainer() *Container {
 
 	return &Container{
 		JWTManager:     jwtManager,
+		GoogleOAuth:    googleOAuth,
 		UserRepo:       userRepo,
 		AuthService:    authService,
 		UserService:    userService,

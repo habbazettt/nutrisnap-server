@@ -41,8 +41,8 @@ Tujuan: menyediakan autentikasi aman dan modern, sekelas aplikasi production.
 * [x] Endpoint “Get Current User”
 * [x] Endpoint "Update Profile"
 * [x] Endpoint "Change Password"
-* [ ] Implementasi Google OAuth2 login
-* [ ] Model OAuthAccount + relasi ke User
+* [x] Implementasi Google OAuth2 login
+* [x] Model OAuthAccount + relasi ke User
 * [ ] Role-based access (user, admin)
 
 ---

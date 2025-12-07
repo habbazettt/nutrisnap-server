@@ -22,6 +22,7 @@ type User struct {
 	AvatarURL       *string    `gorm:"size:500" json:"avatar_url,omitempty"`
 	Role            UserRole   `gorm:"type:varchar(20);default:user" json:"role"`
 	EmailVerifiedAt *time.Time `json:"email_verified_at,omitempty"`
+	GoogleID        *string    `gorm:"size:100;index" json:"-"`
 
 	// Relations
 	OAuthAccounts []OAuthAccount `gorm:"foreignKey:UserID" json:"oauth_accounts,omitempty"`
