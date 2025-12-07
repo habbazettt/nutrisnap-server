@@ -851,6 +851,37 @@
                     "response": []
                 }
             ]
+        },
+        {
+            "name": "Product",
+            "item": [
+                {
+                    "name": "Get Product by Barcode",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/product/{{barcode}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "product",
+                                "{{barcode}}"
+                            ]
+                        },
+                        "description": "Get product details by barcode (checks local DB first, then OpenFoodFacts)"
+                    },
+                    "response": []
+                }
+            ]
         }
     ]
 }

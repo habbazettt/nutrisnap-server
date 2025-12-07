@@ -71,8 +71,8 @@ Tujuan: memproses barcode untuk hasil yang cepat & akurat, sebelum OCR.
 
 ### Checklist
 
-* [ ] Terima `barcode` pada endpoint upload
 * [ ] Integrasi API OpenFoodFacts
+* [ ] Terima `barcode` pada endpoint upload
 * [ ] Mapping nutriments OF → canonical nutrient schema
 * [ ] Simpan ke tabel `products` sebagai cache
 * [ ] Endpoint `GET /v1/product/:barcode`

@@ -11,6 +11,7 @@ import (
 	"github.com/habbazettt/nutrisnap-server/pkg/database"
 	"github.com/habbazettt/nutrisnap-server/pkg/jwt"
 	"github.com/habbazettt/nutrisnap-server/pkg/oauth"
+	"github.com/habbazettt/nutrisnap-server/pkg/openfoodfacts"
 	"github.com/habbazettt/nutrisnap-server/pkg/storage"
 )
 
@@ -25,21 +26,27 @@ type Container struct {
 	// Storage
 	StorageClient *storage.Client
 
+	// External APIs
+	OFFClient *openfoodfacts.Client
+
 	// Repositories
-	UserRepo repositories.UserRepository
-	ScanRepo repositories.ScanRepository
+	UserRepo    repositories.UserRepository
+	ScanRepo    repositories.ScanRepository
+	ProductRepo repositories.ProductRepository
 
 	// Services
-	AuthService  services.AuthService
-	UserService  services.UserService
-	AdminService services.AdminService
-	ScanService  services.ScanService
+	AuthService    services.AuthService
+	UserService    services.UserService
+	AdminService   services.AdminService
+	ScanService    services.ScanService
+	ProductService services.ProductService
 
 	// Controllers
-	AuthController  *controllers.AuthController
-	UserController  *controllers.UserController
-	AdminController *controllers.AdminController
-	ScanController  *controllers.ScanController
+	AuthController    *controllers.AuthController
+	UserController    *controllers.UserController
+	AdminController   *controllers.AdminController
+	ScanController    *controllers.ScanController
+	ProductController *controllers.ProductController
 }
 
 // NewContainer initializes all dependencies
@@ -79,36 +86,46 @@ func NewContainer() *Container {
 		}
 	}
 
+	// Initialize OpenFoodFacts client
+	offClient := openfoodfacts.NewClient()
+
 	// Initialize repositories
 	userRepo := repositories.NewUserRepository(db)
 	scanRepo := repositories.NewScanRepository(db)
+	productRepo := repositories.NewProductRepository(db)
 
 	// Initialize services
 	authService := services.NewAuthService(userRepo, jwtManager, googleOAuth)
 	userService := services.NewUserService(userRepo)
 	adminService := services.NewAdminService(userRepo)
-	scanService := services.NewScanService(scanRepo, storageClient)
+	productService := services.NewProductService(productRepo, offClient)
+	scanService := services.NewScanService(scanRepo, storageClient, productService)
 
 	// Initialize controllers
 	authController := controllers.NewAuthController(authService)
 	userController := controllers.NewUserController(userService)
 	adminController := controllers.NewAdminController(adminService)
 	scanController := controllers.NewScanController(scanService)
+	productController := controllers.NewProductController(productService)
 
 	return &Container{
-		JWTManager:      jwtManager,
-		GoogleOAuth:     googleOAuth,
-		StorageClient:   storageClient,
-		UserRepo:        userRepo,
-		ScanRepo:        scanRepo,
-		AuthService:     authService,
-		UserService:     userService,
-		AdminService:    adminService,
-		ScanService:     scanService,
-		AuthController:  authController,
-		UserController:  userController,
-		AdminController: adminController,
-		ScanController:  scanController,
+		JWTManager:        jwtManager,
+		GoogleOAuth:       googleOAuth,
+		StorageClient:     storageClient,
+		OFFClient:         offClient,
+		UserRepo:          userRepo,
+		ScanRepo:          scanRepo,
+		ProductRepo:       productRepo,
+		AuthService:       authService,
+		UserService:       userService,
+		AdminService:      adminService,
+		ScanService:       scanService,
+		ProductService:    productService,
+		AuthController:    authController,
+		UserController:    userController,
+		AdminController:   adminController,
+		ScanController:    scanController,
+		ProductController: productController,
 	}
 }
 
@@ -146,6 +163,11 @@ func (c *Container) GetAdminController() *controllers.AdminController {
 // GetScanController returns the scan controller
 func (c *Container) GetScanController() *controllers.ScanController {
 	return c.ScanController
+}
+
+// GetProductController returns the product controller
+func (c *Container) GetProductController() *controllers.ProductController {
+	return c.ProductController
 }
 
 // GetJWTManager returns the JWT manager
