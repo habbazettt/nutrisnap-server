@@ -24,6 +24,7 @@ Tujuan: membangun fondasi backend yang stabil, modular, aman, dan siap mensuppor
 * [x] Setup health check endpoint (`/api/v1/healthz`)
 * [x] Integrasi Swagger/OpenAPI (`/docs`)
 * [x] Integrasi Prometheus & Grafana (monitoring dasar)
+* [x] Setup API Status constants
 
 ---
 
