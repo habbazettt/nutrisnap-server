@@ -91,13 +91,16 @@ func (w *OCRWorker) processScan(ctx context.Context, scanID string) error {
 	w.scanRepo.Update(scan)
 
 	// 2. Run OCR
-	nutrients, servingSize, err := w.ocrService.ProcessImageFromStorage(ctx, *scan.ImageRef)
+	nutrients, servingSize, rawText, err := w.ocrService.ProcessImageFromStorage(ctx, *scan.ImageRef)
 	if err != nil {
 		scan.Status = "failed"
 		// Append error?
 		w.scanRepo.Update(scan)
 		return err
 	}
+
+	// Save Raw Text for debugging
+	scan.OCRRaw = &rawText
 
 	// 3. Process Nutrition Data (Analysis, Score, etc.)
 	// Calculate NutriScore

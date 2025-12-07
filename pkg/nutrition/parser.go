@@ -11,8 +11,7 @@ import (
 
 // ParseFromText extracts nutrient information and serving size from OCR text
 func ParseFromText(text string) (*models.Nutrients, string) {
-	// 1. Text Normalization
-	text = strings.ToLower(text)
+	text = cleanupOCRText(text)
 	text = strings.ReplaceAll(text, "|", " ")  // Pipe often read as separator
 	text = strings.ReplaceAll(text, "\n", " ") // Treat newlines as space for regex simplicity
 
@@ -22,7 +21,6 @@ func ParseFromText(text string) (*models.Nutrients, string) {
 	// Extract Serving Size
 	// Pattern: "Serving Size ... 30g" or "Takaran Saji ... 30 g" or "Takaran Saji 30g"
 	// Regex: (serving size|takaran saji).*?(\d+\s*[gk]?[gm]l?)
-	// Capture group 2 is the value+unit
 	reServing := regexp.MustCompile(`(serving size|takaran saji).*?(\d+\s*[gk]?[gm]l?)`)
 	matchesServing := reServing.FindStringSubmatch(text)
 	if len(matchesServing) > 2 {
@@ -36,11 +34,9 @@ func ParseFromText(text string) (*models.Nutrients, string) {
 		for _, key := range keys {
 			// Regex explanation:
 			// %s : key word
-			// \s* : optional whitespace
-			// [:=-]? : optional separator (: or = or -)
-			// \s* : optional whitespace
+			// .{0,60}? : match any characters (non-greedy, max 60 chars) to skip separators like " / Total Fat :"
 			// (\d+[.,]?\d*) : capture group for number
-			pattern := fmt.Sprintf(`%s\s*[:=-]?\s*(\d+[.,]?\d*)`, regexp.QuoteMeta(key))
+			pattern := fmt.Sprintf(`%s.{0,60}?(\d+[.,]?\d*)`, regexp.QuoteMeta(key))
 			re := regexp.MustCompile(pattern)
 
 			matches := re.FindStringSubmatch(text)
@@ -58,46 +54,78 @@ func ParseFromText(text string) (*models.Nutrients, string) {
 		return nil
 	}
 
-	// 1. Energy (Kcal priority)
+	// Energy (Kcal priority)
 	if val := extract([]string{"energi total", "energy", "kalori", "calories", "kcal"}); val != nil {
 		nutrients.EnergyKcal = val
 	}
 
-	// 2. Protein
+	// Protein
 	if val := extract([]string{"protein", "proteine"}); val != nil {
 		nutrients.ProteinG = val
 	}
 
-	// 3. Fat (Total Fat)
+	// Fat (Total Fat)
 	// Prioritize "Total Fat" over generic "Fat"
 	if val := extract([]string{"lemak total", "total fat", "lemak", "fat", "lipides"}); val != nil {
 		nutrients.FatG = val
 	}
 
-	// 4. Saturated Fat
+	// Saturated Fat
 	if val := extract([]string{"lemak jenuh", "saturated fat", "sat fat"}); val != nil {
 		nutrients.SaturatedFatG = val
 	}
 
-	// 5. Carbohydrate
+	// Carbohydrate
 	if val := extract([]string{"karbohidrat", "total carb", "carbohydrate", "carb", "glucides"}); val != nil {
 		nutrients.CarbohydrateG = val
 	}
 
-	// 6. Sugar
+	// Sugar
 	if val := extract([]string{"gula", "sugars", "sugar", "total sugar"}); val != nil {
 		nutrients.SugarG = val
 	}
 
-	// 7. Fiber (Serat)
+	// Fiber (Serat)
 	if val := extract([]string{"serat pangan", "serat", "fiber", "dietary fiber"}); val != nil {
 		nutrients.FiberG = val
 	}
 
-	// 8. Sodium (Natrium)
+	// Sodium (Natrium)
 	if val := extract([]string{"natrium", "sodium"}); val != nil {
 		nutrients.SodiumMg = val
 	}
 
 	return nutrients, servingSize
+}
+
+// cleanupOCRText fixes common OCR typos and noise
+func cleanupOCRText(text string) string {
+	text = strings.ToLower(text)
+
+	// Dictionary-based fix
+	replacements := map[string]string{
+		"lomak":       "lemak",
+		"lornak":      "lemak",
+		"garm":        "garam",
+		"kabohidar":   "karbohidrat",
+		"karbohidart": "karbohidrat",
+
+		// Noise fixes (specific to observed output)
+		"0'3": "0.3",
+		"0'5": "0.5",
+		"0'0": "0.0",
+	}
+
+	for old, new := range replacements {
+		text = strings.ReplaceAll(text, old, new)
+	}
+
+	// Regex-based fixes
+
+	// Fix quote as decimal separator: 0'5 -> 0.5
+	// Use regex carefully inside number
+	reQuoteDecimal := regexp.MustCompile(`(\d)'(\d)`)
+	text = reQuoteDecimal.ReplaceAllString(text, "$1.$2")
+
+	return text
 }

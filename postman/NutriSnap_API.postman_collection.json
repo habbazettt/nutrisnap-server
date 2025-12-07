@@ -839,7 +839,7 @@
                                 "{{scan_id}}"
                             ]
                         },
-                        "description": "Get a specific scan by ID"
+                        "description": "Get a specific scan by ID. Response now includes 'nutrients', 'nutri_score' (A-E), 'highlights' (e.g. High Sugar), and 'serving_size'."
                     },
                     "response": []
                 },

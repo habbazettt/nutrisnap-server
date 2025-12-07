@@ -15,7 +15,7 @@ import (
 )
 
 type OCRService interface {
-	ProcessImageFromStorage(ctx context.Context, objectName string) (*models.Nutrients, string, error)
+	ProcessImageFromStorage(ctx context.Context, objectName string) (*models.Nutrients, string, string, error)
 }
 
 type ocrService struct {
@@ -28,13 +28,13 @@ func NewOCRService(storageClient *storage.Client) OCRService {
 	}
 }
 
-func (s *ocrService) ProcessImageFromStorage(ctx context.Context, objectName string) (*models.Nutrients, string, error) {
+func (s *ocrService) ProcessImageFromStorage(ctx context.Context, objectName string) (*models.Nutrients, string, string, error) {
 	tmpFile := filepath.Join(os.TempDir(), fmt.Sprintf("ocr-%s%s", uuid.New().String(), filepath.Ext(objectName)))
 
 	// Create temp file
 	file, err := os.Create(tmpFile)
 	if err != nil {
-		return nil, "", fmt.Errorf("failed to create temp file: %w", err)
+		return nil, "", "", fmt.Errorf("failed to create temp file: %w", err)
 	}
 	defer func() {
 		file.Close()
@@ -44,12 +44,12 @@ func (s *ocrService) ProcessImageFromStorage(ctx context.Context, objectName str
 	// Download content
 	reader, err := s.storageClient.Download(ctx, objectName)
 	if err != nil {
-		return nil, "", fmt.Errorf("failed to get image from storage: %w", err)
+		return nil, "", "", fmt.Errorf("failed to get image from storage: %w", err)
 	}
 	defer reader.Close()
 
 	if _, err := io.Copy(file, reader); err != nil {
-		return nil, "", fmt.Errorf("failed to write image to temp file: %w", err)
+		return nil, "", "", fmt.Errorf("failed to write image to temp file: %w", err)
 	}
 
 	client := ocr.NewClient()
@@ -57,10 +57,10 @@ func (s *ocrService) ProcessImageFromStorage(ctx context.Context, objectName str
 
 	text, err := client.ProcessImage(tmpFile)
 	if err != nil {
-		return nil, "", fmt.Errorf("OCR processing failed: %w", err)
+		return nil, "", "", fmt.Errorf("OCR processing failed: %w", err)
 	}
 
 	// Use the dedicated nutrition parser package
 	nutrients, servingSize := nutrition.ParseFromText(text)
-	return nutrients, servingSize, nil
+	return nutrients, servingSize, text, nil
 }

@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -24,13 +25,16 @@ type ScanResponse struct {
 	Barcode          *string                    `json:"barcode,omitempty"`
 	Status           models.ScanStatus          `json:"status"`
 	ImageURL         *string                    `json:"image_url,omitempty"`
+	ServingSize      *string                    `json:"serving_size,omitempty"`
 	NutriScore       *string                    `json:"nutri_score,omitempty"`
 	NutriScoreValue  *int                       `json:"nutri_score_value,omitempty"`
+	Nutrients        *models.Nutrients          `json:"nutrients,omitempty"`
 	Highlights       []models.NutrientHighlight `json:"highlights,omitempty"`
 	Insights         []models.Insight           `json:"insights,omitempty"`
 	ProcessingTimeMs *int                       `json:"processing_time_ms,omitempty"`
 	ErrorMessage     *string                    `json:"error_message,omitempty"`
 	CreatedAt        time.Time                  `json:"created_at"`
+	OCRRaw           *string                    `json:"ocr_raw,omitempty"` // Debugging field
 }
 
 // ScanUploadResponse represents the upload response
@@ -60,7 +64,7 @@ func ToScanResponse(scan *models.Scan, imageURL *string) ScanResponse {
 		userIDStr = &s
 	}
 
-	return ScanResponse{
+	resp := ScanResponse{
 		ID:               scan.ID.String(),
 		UserID:           userIDStr,
 		Barcode:          scan.Barcode,
@@ -71,7 +75,58 @@ func ToScanResponse(scan *models.Scan, imageURL *string) ScanResponse {
 		ProcessingTimeMs: scan.ProcessingTimeMs,
 		ErrorMessage:     scan.ErrorMessage,
 		CreatedAt:        scan.CreatedAt,
+		OCRRaw:           scan.OCRRaw, // Debugging
 	}
+
+	// 1. Populate Nutrients from Product (preferred) or Scan
+	var nutrientsJSON []byte
+	if scan.Product != nil && len(scan.Product.NutrientsJSON) > 0 {
+		nutrientsJSON = scan.Product.NutrientsJSON
+		// Also get Serving Size from Product
+		resp.ServingSize = scan.Product.ServingSize
+	} else if len(scan.ParsedJSON) > 0 {
+		nutrientsJSON = scan.ParsedJSON
+	}
+
+	if len(nutrientsJSON) > 0 {
+		var n models.Nutrients
+		if err := json.Unmarshal(nutrientsJSON, &n); err == nil {
+			resp.Nutrients = &n
+		}
+	}
+
+	// 2. Populate Highlights
+	// Check Scan duplicate first
+	var highlightsJSON []byte
+	if len(scan.HighlightsJSON) > 0 {
+		highlightsJSON = scan.HighlightsJSON
+	} else if scan.Product != nil && len(scan.Product.HighlightsJSON) > 0 {
+		highlightsJSON = scan.Product.HighlightsJSON
+	}
+
+	if len(highlightsJSON) > 0 {
+		var h []models.NutrientHighlight
+		if err := json.Unmarshal(highlightsJSON, &h); err == nil {
+			resp.Highlights = h
+		}
+	}
+
+	// 3. Populate Insights
+	var insightsJSON []byte
+	if len(scan.InsightsJSON) > 0 {
+		insightsJSON = scan.InsightsJSON
+	} else if scan.Product != nil && len(scan.Product.InsightsJSON) > 0 {
+		insightsJSON = scan.Product.InsightsJSON
+	}
+
+	if len(insightsJSON) > 0 {
+		var i []models.Insight
+		if err := json.Unmarshal(insightsJSON, &i); err == nil {
+			resp.Insights = i
+		}
+	}
+
+	return resp
 }
 
 func ToScanUploadResponse(scan *models.Scan, imageURL *string) ScanUploadResponse {
