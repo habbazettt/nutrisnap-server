@@ -20,9 +20,9 @@ Tujuan: membangun fondasi backend yang stabil, modular, aman, dan siap mensuppor
 * [x] Setup API response envelope (success, error, metadata)
 * [x] Inisialisasi database (GORM) + AutoMigrate (dev environment)
 * [x] Setup API versioning (`/api/v1`)
-* [ ] Integrasi Swagger/OpenAPI (`/docs`)
 * [x] Setup folder structure: routes, controllers, services, repositories
 * [x] Setup health check endpoint (`/api/v1/healthz`)
+* [ ] Integrasi Swagger/OpenAPI (`/docs`)
 * [ ] Integrasi Prometheus & Grafana (monitoring dasar)
 
 ---
