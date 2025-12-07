@@ -369,7 +369,7 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/api/v1/auth/google",
+                            "raw": "{{base_url}}/api/v1/auth/oauth/google",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -377,10 +377,11 @@
                                 "api",
                                 "v1",
                                 "auth",
+                                "oauth",
                                 "google"
                             ]
                         },
-                        "description": "Redirects to Google OAuth login page"
+                        "description": "Redirects to Google OAuth login page (open in browser)"
                     },
                     "response": []
                 }

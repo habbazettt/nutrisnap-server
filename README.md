@@ -36,6 +36,9 @@ nutrisnap-server/
 │   └── grafana/              # Grafana provisioning
 ├── pkg/
 │   ├── database/             # Database connection
+│   ├── jwt/                  # JWT token management
+│   ├── oauth/                # OAuth providers
+│   ├── storage/              # MinIO client
 │   ├── logger/               # Structured logging
 │   └── response/             # API response helpers
 └── docker-compose.yml
@@ -52,6 +55,7 @@ cd nutrisnap-server
 
 # Copy environment file
 cp .env.example .env
+# Edit .env with your Google OAuth credentials
 
 # Start all services
 docker-compose up -d
@@ -75,6 +79,8 @@ go run ./cmd/api/main.go
 
 ## API Endpoints
 
+### Health & Docs
+
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/healthz` | Health check |
@@ -82,17 +88,42 @@ go run ./cmd/api/main.go
 | GET | `/docs/*` | Swagger UI |
 | GET | `/metrics` | Prometheus metrics |
 
-### Coming Soon (EPIC 2-9)
+### Authentication
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/api/v1/auth/register` | User registration |
-| POST | `/api/v1/auth/login` | User login |
+| POST | `/api/v1/auth/login` | User login (JWT) |
+| POST | `/api/v1/auth/refresh` | Refresh access token |
+| GET | `/api/v1/auth/oauth/google` | Google OAuth login |
+
+### User (Protected)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/me` | Get current user |
+| PUT | `/api/v1/me` | Update profile |
+| PUT | `/api/v1/me/password` | Change password |
+
+### Admin (Admin Only)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/admin/stats` | Dashboard stats |
+| GET | `/api/v1/admin/users` | List all users |
+| GET | `/api/v1/admin/users/:id` | Get user by ID |
+| PUT | `/api/v1/admin/users/:id/role` | Update user role |
+| DELETE | `/api/v1/admin/users/:id` | Delete user |
+
+### Scan (Protected)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
 | POST | `/api/v1/scan` | Upload nutrition image |
-| GET | `/api/v1/scan/:id` | Get scan result |
-| GET | `/api/v1/product/:barcode` | Get product by barcode |
-| POST | `/api/v1/compare` | Compare products |
-| GET | `/api/v1/history` | Scan history |
+| GET | `/api/v1/scan` | Get user's scans |
+| GET | `/api/v1/scan/:id` | Get scan by ID |
+| GET | `/api/v1/scan/:id/image` | Get presigned image URL |
+| DELETE | `/api/v1/scan/:id` | Delete scan |
 
 ## Services
 
@@ -137,11 +168,20 @@ go run ./cmd/api/main.go
 | `MINIO_ENDPOINT` | MinIO endpoint |
 | `MINIO_ACCESS_KEY` | MinIO access key |
 | `MINIO_SECRET_KEY` | MinIO secret key |
-| `GRAFANA_USER` | Grafana admin user |
-| `GRAFANA_PASSWORD` | Grafana admin password |
+| `JWT_SECRET` | JWT signing secret |
+| `JWT_ACCESS_EXPIRY` | Access token expiry (e.g., 30m) |
+| `JWT_REFRESH_EXPIRY` | Refresh token expiry (e.g., 168h) |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
+| `GOOGLE_REDIRECT_URL` | Google OAuth callback URL |
 
 ## Features
 
+- ✅ JWT Authentication (Access + Refresh tokens)
+- ✅ Google OAuth2 Login
+- ✅ Role-based Access Control (User/Admin)
+- ✅ Image Upload to MinIO
+- ✅ Presigned URLs for secure image access
 - ✅ Structured logging with slog
 - ✅ Rate limiting (100 req/min default)
 - ✅ API response envelope
