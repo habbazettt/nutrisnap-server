@@ -16,7 +16,7 @@ Tujuan: membangun fondasi backend yang stabil, modular, aman, dan siap mensuppor
 * [x] Setup Docker Compose (App, PostgreSQL, Adminer, MinIO, Tesseract runtime)
 * [x] Tambahkan `.env.example` dan config loader
 * [x] Setup structured logging (slog)
-* [ ] Tambahkan rate limiting middleware
+* [x] Tambahkan rate limiting middleware
 * [ ] Setup API response envelope (success, error, metadata)
 * [ ] Inisialisasi database (GORM) + AutoMigrate (dev environment)
 * [ ] Tambahkan API versioning (`/v1`)

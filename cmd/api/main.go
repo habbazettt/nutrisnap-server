@@ -44,6 +44,7 @@ func main() {
 	})
 
 	app.Use(recover.New())
+	app.Use(middleware.RateLimiter(middleware.DefaultRateLimitConfig()))
 	app.Use(middleware.RequestLogger())
 	app.Use(cors.New())
 
