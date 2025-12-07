@@ -1,6 +1,9 @@
 package bootstrap
 
 import (
+	"context"
+	"log"
+
 	"github.com/habbazettt/nutrisnap-server/config"
 	"github.com/habbazettt/nutrisnap-server/internal/controllers"
 	"github.com/habbazettt/nutrisnap-server/internal/repositories"
@@ -8,6 +11,7 @@ import (
 	"github.com/habbazettt/nutrisnap-server/pkg/database"
 	"github.com/habbazettt/nutrisnap-server/pkg/jwt"
 	"github.com/habbazettt/nutrisnap-server/pkg/oauth"
+	"github.com/habbazettt/nutrisnap-server/pkg/storage"
 )
 
 // Container holds all dependencies
@@ -18,18 +22,24 @@ type Container struct {
 	// OAuth
 	GoogleOAuth *oauth.GoogleOAuth
 
+	// Storage
+	StorageClient *storage.Client
+
 	// Repositories
 	UserRepo repositories.UserRepository
+	ScanRepo repositories.ScanRepository
 
 	// Services
 	AuthService  services.AuthService
 	UserService  services.UserService
 	AdminService services.AdminService
+	ScanService  services.ScanService
 
 	// Controllers
 	AuthController  *controllers.AuthController
 	UserController  *controllers.UserController
 	AdminController *controllers.AdminController
+	ScanController  *controllers.ScanController
 }
 
 // NewContainer initializes all dependencies
@@ -52,29 +62,53 @@ func NewContainer() *Container {
 		RedirectURL:  cfg.Google.RedirectURL,
 	})
 
+	// Initialize MinIO storage client
+	storageClient, err := storage.NewClient(storage.Config{
+		Endpoint:  cfg.MinIO.Endpoint,
+		AccessKey: cfg.MinIO.AccessKey,
+		SecretKey: cfg.MinIO.SecretKey,
+		Bucket:    cfg.MinIO.Bucket,
+		UseSSL:    cfg.MinIO.UseSSL,
+	})
+	if err != nil {
+		log.Printf("Warning: Failed to initialize storage client: %v", err)
+	} else {
+		// Ensure bucket exists
+		if err := storageClient.EnsureBucket(context.Background()); err != nil {
+			log.Printf("Warning: Failed to ensure bucket: %v", err)
+		}
+	}
+
 	// Initialize repositories
 	userRepo := repositories.NewUserRepository(db)
+	scanRepo := repositories.NewScanRepository(db)
 
 	// Initialize services
 	authService := services.NewAuthService(userRepo, jwtManager, googleOAuth)
 	userService := services.NewUserService(userRepo)
 	adminService := services.NewAdminService(userRepo)
+	scanService := services.NewScanService(scanRepo, storageClient)
 
 	// Initialize controllers
 	authController := controllers.NewAuthController(authService)
 	userController := controllers.NewUserController(userService)
 	adminController := controllers.NewAdminController(adminService)
+	scanController := controllers.NewScanController(scanService)
 
 	return &Container{
 		JWTManager:      jwtManager,
 		GoogleOAuth:     googleOAuth,
+		StorageClient:   storageClient,
 		UserRepo:        userRepo,
+		ScanRepo:        scanRepo,
 		AuthService:     authService,
 		UserService:     userService,
 		AdminService:    adminService,
+		ScanService:     scanService,
 		AuthController:  authController,
 		UserController:  userController,
 		AdminController: adminController,
+		ScanController:  scanController,
 	}
 }
 
@@ -107,6 +141,11 @@ func (c *Container) GetUserController() *controllers.UserController {
 // GetAdminController returns the admin controller
 func (c *Container) GetAdminController() *controllers.AdminController {
 	return c.AdminController
+}
+
+// GetScanController returns the scan controller
+func (c *Container) GetScanController() *controllers.ScanController {
+	return c.ScanController
 }
 
 // GetJWTManager returns the JWT manager

@@ -12,6 +12,7 @@ type Container interface {
 	GetAuthController() *controllers.AuthController
 	GetUserController() *controllers.UserController
 	GetAdminController() *controllers.AdminController
+	GetScanController() *controllers.ScanController
 	GetJWTManager() *jwt.Manager
 }
 
@@ -30,7 +31,7 @@ func SetupRoutes(app *fiber.App, container Container) {
 	SetupAuthRoutes(v1, container.GetAuthController())
 	SetupUserRoutes(v1, container.GetUserController(), container.GetJWTManager())
 	SetupAdminRoutes(v1, container.GetAdminController(), container.GetJWTManager())
-	SetupScanRoutes(v1)
+	SetupScanRoutes(v1, container.GetScanController(), container.GetJWTManager())
 	SetupProductRoutes(v1)
 	SetupCompareRoutes(v1)
 	SetupHistoryRoutes(v1)

@@ -1,15 +1,23 @@
 package routes
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"github.com/gofiber/fiber/v2"
+	"github.com/habbazettt/nutrisnap-server/internal/controllers"
+	"github.com/habbazettt/nutrisnap-server/internal/middleware"
+	"github.com/habbazettt/nutrisnap-server/pkg/jwt"
+)
 
 // SetupScanRoutes registers all scan routes
-func SetupScanRoutes(v1 fiber.Router) {
+func SetupScanRoutes(v1 fiber.Router, scanController *controllers.ScanController, jwtManager *jwt.Manager) {
 	scan := v1.Group("/scan")
-	_ = scan
 
-	// Will be implemented in EPIC 3, 5, 6, 7
-	// scan.Post("/", controllers.CreateScan)
-	// scan.Get("/:id", controllers.GetScan)
-	// scan.Delete("/:id", controllers.DeleteScan)
-	// scan.Post("/:id/correct", controllers.CorrectScan)
+	// All scan routes require authentication
+	scan.Use(middleware.JWTAuth(middleware.AuthConfig{JWTManager: jwtManager}))
+
+	// Scan endpoints
+	scan.Post("/", scanController.Upload)
+	scan.Get("/", scanController.GetUserScans)
+	scan.Get("/:id", scanController.GetScan)
+	scan.Get("/:id/image", scanController.GetScanImageURL)
+	scan.Delete("/:id", scanController.DeleteScan)
 }
