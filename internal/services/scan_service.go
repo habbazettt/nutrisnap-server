@@ -22,19 +22,25 @@ type ScanService interface {
 	GetScanImageURL(ctx context.Context, scanID string) (string, error)
 }
 
+type ScanQueue interface {
+	EnqueueScan(scanID string)
+}
+
 type scanService struct {
 	scanRepo       repositories.ScanRepository
 	storageClient  *storage.Client
 	productService ProductService
+	scanQueue      ScanQueue
 	presignExpiry  time.Duration
 }
 
-func NewScanService(scanRepo repositories.ScanRepository, storageClient *storage.Client, productService ProductService) ScanService {
+func NewScanService(scanRepo repositories.ScanRepository, storageClient *storage.Client, productService ProductService, scanQueue ScanQueue) ScanService {
 	return &scanService{
 		scanRepo:       scanRepo,
 		storageClient:  storageClient,
 		productService: productService,
-		presignExpiry:  15 * time.Minute, // Default presigned URL expiry
+		scanQueue:      scanQueue,
+		presignExpiry:  15 * time.Minute,
 	}
 }
 
@@ -78,26 +84,22 @@ func (s *scanService) CreateScan(ctx context.Context, userID string, file io.Rea
 			productID = &product.ID
 			scan.ProductID = productID
 			scan.Status = models.ScanStatusCompleted // Fast-path success!
-		} else {
-			// Log error or ignore?
-			// If barcode invalid/not found, we still create scan but status remains pending (for OCR or retry?)
-			// Or maybe we treat it as pending?
-			// Let's assume pending so background worker (or next step) can try again or fallback to OCR if image exists.
-			// But since we are bypassing OCR if barcode is present, maybe we should return error?
-			// Roadmap says: "Fallback otomatis ke OCR jika tidak ditemukan".
-			// So if barcode lookup fails, we continue with pending status (and worker will pick up image).
-			// BUT if storeImage is false, and barcode fails, then we have nothing to process!
-			if !storeImage {
-				// No image to fallback to...
-				// For now, let's just proceed.
-			}
 		}
+		// If fails, we continue as pending (fallback to OCR)
 	}
 
 	// Save scan to database
 	if err := s.scanRepo.Create(scan); err != nil {
 		// TODO: Cleanup uploaded file if database save fails
 		return nil, fmt.Errorf("failed to create scan: %w", err)
+	}
+
+	// Enqueue for OCR if pending and image is available
+	if scan.Status == models.ScanStatusPending && scan.ImageStored && scan.ImageRef != nil {
+		// Asynchronous enqueue
+		if s.scanQueue != nil {
+			s.scanQueue.EnqueueScan(scan.ID.String())
+		}
 	}
 
 	// Generate presigned URL if image was stored

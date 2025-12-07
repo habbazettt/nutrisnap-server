@@ -94,6 +94,21 @@ definitions:
         example: Operation successful
         type: string
     type: object
+  dto.PaginatedScansResponse:
+    properties:
+      limit:
+        type: integer
+      page:
+        type: integer
+      scans:
+        items:
+          $ref: '#/definitions/dto.ScanResponse'
+        type: array
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
   dto.PaginatedUsersResponse:
     properties:
       limit:
@@ -108,6 +123,29 @@ definitions:
         items:
           $ref: '#/definitions/dto.AdminUserResponse'
         type: array
+    type: object
+  dto.ProductResponse:
+    properties:
+      barcode:
+        type: string
+      brand:
+        type: string
+      id:
+        type: string
+      image_url:
+        type: string
+      name:
+        type: string
+      nutri_score:
+        type: string
+      nutri_score_value:
+        type: integer
+      nutrients:
+        $ref: '#/definitions/models.Nutrients'
+      serving_size:
+        type: string
+      source:
+        type: string
     type: object
   dto.RefreshTokenRequest:
     properties:
@@ -142,6 +180,50 @@ definitions:
         type: string
       user:
         $ref: '#/definitions/dto.UserResponse'
+    type: object
+  dto.ScanResponse:
+    properties:
+      barcode:
+        type: string
+      created_at:
+        type: string
+      error_message:
+        type: string
+      highlights:
+        items:
+          $ref: '#/definitions/models.NutrientHighlight'
+        type: array
+      id:
+        type: string
+      image_url:
+        type: string
+      insights:
+        items:
+          $ref: '#/definitions/models.Insight'
+        type: array
+      nutri_score:
+        type: string
+      nutri_score_value:
+        type: integer
+      processing_time_ms:
+        type: integer
+      status:
+        $ref: '#/definitions/models.ScanStatus'
+      user_id:
+        type: string
+    type: object
+  dto.ScanUploadResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      image_url:
+        type: string
+      message:
+        type: string
+      status:
+        $ref: '#/definitions/models.ScanStatus'
     type: object
   dto.UpdateProfileRequest:
     properties:
@@ -184,6 +266,77 @@ definitions:
         example: user
         type: string
     type: object
+  models.Insight:
+    properties:
+      message:
+        type: string
+      severity:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  models.NutrientHighlight:
+    properties:
+      level:
+        type: string
+      message:
+        type: string
+      nutrient:
+        type: string
+      unit:
+        type: string
+      value:
+        type: number
+    type: object
+  models.Nutrients:
+    properties:
+      calcium_mg:
+        type: number
+      carbohydrate_g:
+        type: number
+      cholesterol_mg:
+        type: number
+      energy_kcal:
+        type: number
+      fat_g:
+        type: number
+      fiber_g:
+        type: number
+      iron_mg:
+        type: number
+      potassium_mg:
+        type: number
+      protein_g:
+        type: number
+      salt_g:
+        type: number
+      saturated_fat_g:
+        type: number
+      sodium_mg:
+        type: number
+      sugar_g:
+        type: number
+      trans_fat_g:
+        type: number
+      vitamin_a_iu:
+        type: number
+      vitamin_c_mg:
+        type: number
+    type: object
+  models.ScanStatus:
+    enum:
+    - pending
+    - processing
+    - completed
+    - failed
+    type: string
+    x-enum-varnames:
+    - ScanStatusPending
+    - ScanStatusProcessing
+    - ScanStatusCompleted
+    - ScanStatusFailed
   models.UserRole:
     enum:
     - user
@@ -650,6 +803,203 @@ paths:
       summary: Change password
       tags:
       - User
+  /product/{barcode}:
+    get:
+      consumes:
+      - application/json
+      description: Get product details by barcode (checks local DB first, then OpenFoodFacts)
+      parameters:
+      - description: Product Barcode
+        in: path
+        name: barcode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ProductResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+      summary: Get product by barcode
+      tags:
+      - Product
+  /scan:
+    get:
+      consumes:
+      - application/json
+      description: Get paginated list of user's scans
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.PaginatedScansResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Get user's scans
+      tags:
+      - Scan
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload an image of nutrition facts to create a new scan
+      parameters:
+      - description: Nutrition facts image
+        in: formData
+        name: image
+        required: true
+        type: file
+      - description: 'Whether to store the image (default: false)'
+        in: formData
+        name: store_image
+        type: boolean
+      - description: Barcode if available
+        in: formData
+        name: barcode
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.ScanUploadResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Upload nutrition image for scanning
+      tags:
+      - Scan
+  /scan/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a scan and its associated image
+      parameters:
+      - description: Scan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.MessageResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Delete a scan
+      tags:
+      - Scan
+    get:
+      consumes:
+      - application/json
+      description: Get a specific scan by its ID
+      parameters:
+      - description: Scan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ScanResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Get scan by ID
+      tags:
+      - Scan
+  /scan/{id}/image:
+    get:
+      consumes:
+      - application/json
+      description: Get a temporary presigned URL to access the scan image
+      parameters:
+      - description: Scan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Get presigned URL for scan image
+      tags:
+      - Scan
 securityDefinitions:
   BearerAuth:
     description: 'JWT token dengan format: Bearer {token}'

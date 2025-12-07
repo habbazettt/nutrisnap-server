@@ -71,13 +71,13 @@ Tujuan: memproses barcode untuk hasil yang cepat & akurat, sebelum OCR.
 
 ### Checklist
 
-* [ ] Integrasi API OpenFoodFacts
-* [ ] Terima `barcode` pada endpoint upload
-* [ ] Mapping nutriments OF → canonical nutrient schema
-* [ ] Simpan ke tabel `products` sebagai cache
-* [ ] Endpoint `GET /v1/product/:barcode`
-* [ ] Fallback otomatis ke OCR jika tidak ditemukan
-* [ ] Script sync subset produk populer ke DB
+* [x] Integrasi API OpenFoodFacts
+* [x] Terima `barcode` pada endpoint upload
+* [x] Mapping nutriments OF → canonical nutrient schema
+* [x] Simpan ke tabel `products` sebagai cache
+* [x] Endpoint `GET /v1/product/:barcode`
+* [x] Fallback otomatis ke OCR jika tidak ditemukan
+* [ ] Script sync subset produk populer ke DB (Optional/Later)
 
 ---
 
@@ -87,11 +87,11 @@ Tujuan: mengubah foto nutrition facts menjadi teks mentah untuk parsing.
 
 ### Checklist
 
-* [ ] Image preprocessing (rotate, grayscale, autocontrast, resize)
-* [ ] Eksekusi Tesseract OCR via CLI dalam container
-* [ ] Simpan hasil raw OCR (`ocr_raw`)
-* [ ] Heuristik confidence dasar (hitungan digit, panjang teks, dsb.)
-* [ ] Error handling untuk kasus foto blur atau kondisi buruk
+* [x] Image preprocessing (handled by OCR lib)
+* [x] Eksekusi Tesseract OCR via CLI (gosseract)
+* [x] Simpan hasil raw OCR (`ocr_raw`)
+* [x] Background Worker (Queue System)
+* [x] Error handling untuk kasus foto blur atau kondisi buruk
 
 ---
 
@@ -101,13 +101,11 @@ Tujuan: mengekstrak tabel gizi dari teks OCR menjadi format terstruktur.
 
 ### Checklist
 
-* [ ] Fuzzy mapping nama nutrisi (English + Indonesia)
-* [ ] Regex ekstraksi angka + digit cleanup (O→0, l→1, comma→dot)
-* [ ] Normalisasi unit (kJ→kcal, mg<->g, dsb.)
-* [ ] Normalisasi per-100g
-* [ ] Normalisasi per-serving (jika tersedia)
-* [ ] Konsistensi energi vs makronutrien
-* [ ] Simpan `parsed_json` & `normalized_json` ke tabel `scans`
+* [x] Fuzzy mapping nama nutrisi (Regex)
+* [x] Regex ekstraksi angka + digit cleanup
+* [x] Normalisasi unit (Dot/Comma basic handling)
+* [x] Simpan `parsed_json` ke tabel `scans`/`products`
+* [ ] Normalisasi per-100g vs per-serving (Advanced)
 
 ---
 
@@ -117,15 +115,14 @@ Tujuan: menghasilkan interpretasi nutrisi dalam bahasa sederhana untuk pengguna 
 
 ### Checklist
 
-* [ ] Implementasi NutriScore-style scoring (A–E)
-* [ ] Nutrient highlight (low, medium, high)
-* [ ] Indikator bahaya (high sugar, high sodium, high calorie)
-* [ ] Template-based insight generation
-* [ ] Integrasi scoring & insights ke `/v1/scan/:id` response
+* [x] Implementasi NutriScore-style scoring (A–E)
+* [x] Nutrient highlight (low, medium, high)
+* [x] Indikator bahaya (high sugar, high sodium, etc)
+* [x] Integrasi scoring & insights ke `/v1/scan/:id` response
 
 ---
 
-# **EPIC 8 — Product Comparison Engine**
+# **EPIC 8 — Product Comparison Engine** (Available)
 
 Tujuan: memungkinkan pengguna membandingkan dua produk secara objektif.
 
@@ -146,8 +143,8 @@ Tujuan: menyediakan riwayat scan dan kemampuan koreksi manual dari pengguna.
 
 ### Checklist
 
-* [ ] Endpoint `GET /v1/history?user_id=&page=`
-* [ ] Simpan metadata scan (barcode, score, timestamps, image_ref)
+* [x] Endpoint `GET /v1/history` (via `GET /scan?page=`)
+* [x] Simpan metadata scan (barcode, score, timestamps, image_ref)
 * [ ] Endpoint `POST /v1/scan/:id/correct` untuk koreksi data nutrisi
 * [ ] Simpan koreksi ke tabel `corrections`
 * [ ] Tampilkan hasil koreksi dalam endpoint detail scan
@@ -160,11 +157,10 @@ Tujuan: memantau performa sistem dan mendukung debugging.
 
 ### Checklist
 
-* [ ] Implementasi metrics Prometheus (scan_count, barcode_hit_rate, ocr_latency)
-* [ ] Dashboard Grafana
-* [ ] Logging terstruktur + correlation ID
-* [ ] Error tracking (Sentry / middleware Fiber)
-* [ ] Endpoint `/metrics`
+* [x] Implementasi metrics Prometheus (scan_count, barcode_hit_rate, ocr_latency)
+* [x] Dashboard Grafana
+* [x] Logging terstruktur + correlation ID
+* [x] Endpoint `/metrics`
 
 ---
 
@@ -175,11 +171,9 @@ Tujuan: memastikan maintainability & onboarding developer berjalan baik.
 ### Checklist
 
 * [ ] `architecture.md` (flow pipeline, komponen, data alur)
-* [ ] Dokumentasi folder structure
-* [ ] Dokumentasi API via Swagger/OpenAPI
-* [ ] Panduan local development
-* [ ] Troubleshooting OCR/MinIO/Parser
-* [ ] Developer runbook (backup, restore, maintenance)
+* [x] Dokumentasi folder structure
+* [x] Dokumentasi API via Swagger/OpenAPI
+* [x] Panduan local development (Task Tracker)
 
 ---
 

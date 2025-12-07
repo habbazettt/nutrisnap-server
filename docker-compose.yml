@@ -12,6 +12,7 @@ services:
       - PORT=3000
       - DB_HOST=postgres
       - DB_PORT=5432
+      - TZ=Asia/Jakarta
       - DB_USER=${DB_USER:-nutrisnap}
       - DB_PASSWORD=${DB_PASSWORD:-nutrisnap_secret}
       - DB_NAME=${DB_NAME:-nutrisnap_db}
@@ -45,6 +46,7 @@ services:
     ports:
       - "${DB_PORT:-5432}:5432"
     environment:
+      - TZ=Asia/Jakarta
       - POSTGRES_USER=${DB_USER:-nutrisnap}
       - POSTGRES_PASSWORD=${DB_PASSWORD:-nutrisnap_secret}
       - POSTGRES_DB=${DB_NAME:-nutrisnap_db}

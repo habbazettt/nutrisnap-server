@@ -38,7 +38,7 @@ func (r *scanRepository) Create(scan *models.Scan) error {
 
 func (r *scanRepository) FindByID(id string) (*models.Scan, error) {
 	var scan models.Scan
-	err := r.db.Where("id = ?", id).First(&scan).Error
+	err := r.db.Preload("Product").Where("id = ?", id).First(&scan).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrScanNotFound
@@ -61,7 +61,7 @@ func (r *scanRepository) FindByUserID(userID string, offset, limit int) ([]model
 		return nil, 0, err
 	}
 
-	if err := r.db.Where("user_id = ?", uid).
+	if err := r.db.Preload("Product").Where("user_id = ?", uid).
 		Offset(offset).Limit(limit).
 		Order("created_at DESC").
 		Find(&scans).Error; err != nil {

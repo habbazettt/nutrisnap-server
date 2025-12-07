@@ -8,6 +8,7 @@ import (
 	"github.com/habbazettt/nutrisnap-server/internal/controllers"
 	"github.com/habbazettt/nutrisnap-server/internal/repositories"
 	"github.com/habbazettt/nutrisnap-server/internal/services"
+	"github.com/habbazettt/nutrisnap-server/internal/workers"
 	"github.com/habbazettt/nutrisnap-server/pkg/database"
 	"github.com/habbazettt/nutrisnap-server/pkg/jwt"
 	"github.com/habbazettt/nutrisnap-server/pkg/oauth"
@@ -40,6 +41,10 @@ type Container struct {
 	AdminService   services.AdminService
 	ScanService    services.ScanService
 	ProductService services.ProductService
+	OCRService     services.OCRService
+
+	// Workers
+	OCRWorker *workers.OCRWorker
 
 	// Controllers
 	AuthController    *controllers.AuthController
@@ -99,7 +104,13 @@ func NewContainer() *Container {
 	userService := services.NewUserService(userRepo)
 	adminService := services.NewAdminService(userRepo)
 	productService := services.NewProductService(productRepo, offClient)
-	scanService := services.NewScanService(scanRepo, storageClient, productService)
+	ocrService := services.NewOCRService(storageClient)
+
+	// Initialize Workers
+	ocrWorker := workers.NewOCRWorker(scanRepo, productRepo, ocrService, 100) // Buffer 100 jobs
+
+	// ScanService needs ScanQueue (implemented by ocrWorker)
+	scanService := services.NewScanService(scanRepo, storageClient, productService, ocrWorker)
 
 	// Initialize controllers
 	authController := controllers.NewAuthController(authService)
@@ -121,6 +132,8 @@ func NewContainer() *Container {
 		AdminService:      adminService,
 		ScanService:       scanService,
 		ProductService:    productService,
+		OCRService:        ocrService,
+		OCRWorker:         ocrWorker,
 		AuthController:    authController,
 		UserController:    userController,
 		AdminController:   adminController,

@@ -43,6 +43,8 @@ type Product struct {
 	ServingNutrientsJSON JSON          `gorm:"type:jsonb" json:"serving_nutrients,omitempty"`
 	NutriScore           *string       `gorm:"size:1" json:"nutri_score,omitempty"`
 	NutriScoreValue      *int          `json:"nutri_score_value,omitempty"`
+	HighlightsJSON       JSON          `gorm:"type:jsonb" json:"highlights,omitempty"`
+	InsightsJSON         JSON          `gorm:"type:jsonb" json:"insights,omitempty"`
 
 	// Relations
 	Scans []Scan `gorm:"foreignKey:ProductID" json:"scans,omitempty"`

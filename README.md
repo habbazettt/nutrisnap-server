@@ -2,6 +2,8 @@
 
 Backend API untuk **NutriSnap** - platform yang memproses foto nutrition facts atau barcode untuk menghasilkan informasi nutrisi, skor kesehatan, insight, dan perbandingan antar produk.
 
+## Key Features
+
 ## Tech Stack
 
 | Category | Technology |

@@ -35,11 +35,19 @@ func main() {
 	// Initialize dependency injection container
 	container := bootstrap.NewContainer()
 
+	// Start Background Workers
+	// We use 5 concurrent workers for OCR processing
+	container.OCRWorker.Start(5)
+
 	app := bootstrap.NewApp(container)
 
 	go startServer(app, cfg.Server.Port)
 
 	waitForShutdown()
+
+	// Stop Background Workers
+	container.OCRWorker.Stop()
+
 	shutdown(app)
 }
 

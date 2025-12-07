@@ -691,7 +691,7 @@
             "name": "Scan",
             "item": [
                 {
-                    "name": "Upload Image",
+                    "name": "Upload Image (OCR Queue)",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -717,7 +717,7 @@
                                     "key": "barcode",
                                     "value": "",
                                     "type": "text",
-                                    "disabled": true
+                                    "description": "Leave empty to trigger OCR (Slow Path)"
                                 }
                             ]
                         },
@@ -732,7 +732,53 @@
                                 "scan"
                             ]
                         },
-                        "description": "Upload nutrition facts image for scanning. Max 10MB, JPEG/PNG/WebP only."
+                        "description": "Upload image without barcode. Server will process asynchronously via OCR Worker. Status: Pending -> Completed."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Upload Image + Barcode (Fast Path)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "image",
+                                    "type": "file",
+                                    "src": ""
+                                },
+                                {
+                                    "key": "store_image",
+                                    "value": "true",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "barcode",
+                                    "value": "7622210449283",
+                                    "type": "text",
+                                    "description": "7622210449283 (Oreo) or 3046920029757 (Nutella)"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/scan",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "scan"
+                            ]
+                        },
+                        "description": "Upload image WITH barcode. Server finds product immediately. Status: Completed."
                     },
                     "response": []
                 },
