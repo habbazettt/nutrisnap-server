@@ -20,6 +20,15 @@ services:
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-minioadmin}
       - MINIO_BUCKET=${MINIO_BUCKET:-nutrisnap}
       - MINIO_USE_SSL=false
+      # JWT Configuration
+      - JWT_SECRET=${JWT_SECRET:-nutrisnap-secret-key-change-in-production}
+      - JWT_ACCESS_EXPIRY=${JWT_ACCESS_EXPIRY:-30m}
+      - JWT_REFRESH_EXPIRY=${JWT_REFRESH_EXPIRY:-168h}
+      - JWT_ISSUER=${JWT_ISSUER:-nutrisnap-api}
+      # Google OAuth Configuration
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_REDIRECT_URL=${GOOGLE_REDIRECT_URL:-http://localhost:3000/api/v1/auth/google/callback}
     depends_on:
       postgres:
         condition: service_healthy
