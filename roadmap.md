@@ -54,6 +54,7 @@ Tujuan: menangani upload gambar nutrition facts secara efisien dan aman.
 
 ### Checklist
 
+* [ ] Buat MinIO client
 * [ ] Endpoint upload gambar nutrition (`POST /v1/scan`)
 * [ ] Validasi file (ukuran, tipe MIME, dimensi minimal)
 * [ ] Opsi `store_image=true|false` (opt-in)
