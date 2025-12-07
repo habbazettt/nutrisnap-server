@@ -58,8 +58,10 @@ type MessageEnvelope struct {
 }
 
 func newMetadata() *Metadata {
+	// Use WIB (Asia/Jakarta) timezone
+	loc, _ := time.LoadLocation("Asia/Jakarta")
 	return &Metadata{
-		Timestamp: time.Now().UTC().Format(time.RFC3339),
+		Timestamp: time.Now().In(loc).Format(time.RFC3339),
 		Version:   "1.0.0",
 	}
 }

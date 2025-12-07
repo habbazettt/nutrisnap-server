@@ -12,10 +12,11 @@ type HealthResponse struct {
 }
 
 func NewHealthResponse() HealthResponse {
+	loc, _ := time.LoadLocation("Asia/Jakarta")
 	return HealthResponse{
 		Status:    "healthy",
 		Service:   "nutrisnap-api",
 		Version:   "1.0.0",
-		Timestamp: time.Now().UTC().Format(time.RFC3339),
+		Timestamp: time.Now().In(loc).Format(time.RFC3339),
 	}
 }

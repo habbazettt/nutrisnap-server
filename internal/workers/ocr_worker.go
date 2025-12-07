@@ -114,16 +114,17 @@ func (w *OCRWorker) processScan(ctx context.Context, scanID string) error {
 	highlightsJSON, _ := json.Marshal(highlights)
 	insightsJSON, _ := json.Marshal(insights)
 
-	ocrBarcode := fmt.Sprintf("ocr-%s", scanID) // Unique pseudo-barcode
+	ocrBarcode := fmt.Sprintf("ocr-%s", scanID)
 
 	var servingSizePtr *string
 	if servingSize != "" {
 		servingSizePtr = &servingSize
 	}
 
+	loc, _ := time.LoadLocation("Asia/Jakarta")
 	product := &models.Product{
 		Barcode:         ocrBarcode,
-		Name:            "Scanned Product " + time.Now().Format("02-Jan 15:04"),
+		Name:            "Scanned Product " + time.Now().In(loc).Format("02-Jan 15:04"),
 		Source:          models.SourceOCRScan,
 		NutrientsJSON:   nutrientsJSON,
 		ServingSize:     servingSizePtr,
