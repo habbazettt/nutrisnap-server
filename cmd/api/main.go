@@ -2,60 +2,40 @@ package main
 
 import (
 	"os"
+	"os/signal"
+	"syscall"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/recover"
-	"github.com/habbazettt/nutrisnap-server/internal/middleware"
-	"github.com/habbazettt/nutrisnap-server/internal/routes"
+	"github.com/habbazettt/nutrisnap-server/config"
+	"github.com/habbazettt/nutrisnap-server/internal/bootstrap"
+	"github.com/habbazettt/nutrisnap-server/pkg/database"
 	"github.com/habbazettt/nutrisnap-server/pkg/logger"
-	"github.com/habbazettt/nutrisnap-server/pkg/response"
 )
 
 func main() {
-	env := os.Getenv("ENV")
-	if env == "" {
-		env = "development"
+	cfg := loadConfig()
+
+	bootstrap.InitLogger(cfg)
+	bootstrap.InitDatabase(cfg)
+
+	app := bootstrap.NewApp()
+
+	go startServer(app, cfg.Server.Port)
+
+	waitForShutdown()
+	shutdown(app)
+}
+
+func loadConfig() *config.Config {
+	cfg, err := config.Load()
+	if err != nil {
+		logger.Init(logger.Config{Level: "error", Format: "text", Environment: "development"})
+		logger.Error("failed to load configuration", "error", err)
+		os.Exit(1)
 	}
+	return cfg
+}
 
-	logLevel := os.Getenv("LOG_LEVEL")
-	if logLevel == "" {
-		logLevel = "info"
-	}
-
-	logFormat := "text"
-	if env == "production" {
-		logFormat = "json"
-	}
-
-	logger.Init(logger.Config{
-		Level:       logLevel,
-		Format:      logFormat,
-		Environment: env,
-	})
-
-	logger.Info("starting NutriSnap API",
-		"environment", env,
-		"log_level", logLevel,
-	)
-
-	app := fiber.New(fiber.Config{
-		AppName:      "NutriSnap API v1.0.0",
-		ErrorHandler: customErrorHandler,
-	})
-
-	app.Use(recover.New())
-	app.Use(middleware.RateLimiter(middleware.DefaultRateLimitConfig()))
-	app.Use(middleware.RequestLogger())
-	app.Use(cors.New())
-
-	routes.SetupRoutes(app)
-
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "3000"
-	}
-
+func startServer(app interface{ Listen(addr string) error }, port string) {
 	logger.Info("server listening", "port", port)
 	if err := app.Listen(":" + port); err != nil {
 		logger.Error("failed to start server", "error", err)
@@ -63,18 +43,22 @@ func main() {
 	}
 }
 
-func customErrorHandler(c *fiber.Ctx, err error) error {
-	code := fiber.StatusInternalServerError
+func waitForShutdown() {
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+}
 
-	if e, ok := err.(*fiber.Error); ok {
-		code = e.Code
+func shutdown(app interface{ Shutdown() error }) {
+	logger.Info("shutting down server...")
+
+	if err := app.Shutdown(); err != nil {
+		logger.Error("error during server shutdown", "error", err)
 	}
 
-	logger.Error("request error",
-		"code", code,
-		"error", err.Error(),
-		"path", c.Path(),
-	)
+	if err := database.Close(); err != nil {
+		logger.Error("error closing database connection", "error", err)
+	}
 
-	return response.Error(c, code, err.Error())
+	logger.Info("server stopped")
 }
