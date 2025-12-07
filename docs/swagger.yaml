@@ -1,5 +1,15 @@
 basePath: /api/v1
 definitions:
+  controllers.CreateCorrectionRequest:
+    properties:
+      corrected_value:
+        type: string
+      field_name:
+        type: string
+    required:
+    - corrected_value
+    - field_name
+    type: object
   dto.AdminStatsResponse:
     properties:
       total_products:
@@ -273,6 +283,35 @@ definitions:
         example: user
         type: string
     type: object
+  models.CorrectionResponse:
+    properties:
+      corrected_value:
+        type: string
+      created_at:
+        type: string
+      field_name:
+        type: string
+      id:
+        type: string
+      original_value:
+        type: string
+      reviewed_at:
+        type: string
+      scan_id:
+        type: string
+      status:
+        $ref: '#/definitions/models.CorrectionStatus'
+    type: object
+  models.CorrectionStatus:
+    enum:
+    - pending
+    - approved
+    - rejected
+    type: string
+    x-enum-varnames:
+    - CorrectionStatusPending
+    - CorrectionStatusApproved
+    - CorrectionStatusRejected
   models.Insight:
     properties:
       message:
@@ -974,6 +1013,76 @@ paths:
       summary: Get scan by ID
       tags:
       - Scan
+  /scan/{id}/correct:
+    post:
+      consumes:
+      - application/json
+      description: User can submit corrections for incorrect OCR data
+      parameters:
+      - description: Scan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Correction data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.CreateCorrectionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.CorrectionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Submit a correction for scan data
+      tags:
+      - Correction
+  /scan/{id}/corrections:
+    get:
+      consumes:
+      - application/json
+      description: Get all corrections submitted for a specific scan
+      parameters:
+      - description: Scan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.CorrectionResponse'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Get corrections for a scan
+      tags:
+      - Correction
   /scan/{id}/image:
     get:
       consumes:

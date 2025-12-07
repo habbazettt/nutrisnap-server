@@ -8,7 +8,7 @@ import (
 )
 
 // SetupScanRoutes registers all scan routes
-func SetupScanRoutes(v1 fiber.Router, scanController *controllers.ScanController, jwtManager *jwt.Manager) {
+func SetupScanRoutes(v1 fiber.Router, scanController *controllers.ScanController, correctionController *controllers.CorrectionController, jwtManager *jwt.Manager) {
 	scan := v1.Group("/scan")
 
 	// All scan routes require authentication
@@ -20,4 +20,8 @@ func SetupScanRoutes(v1 fiber.Router, scanController *controllers.ScanController
 	scan.Get("/:id", scanController.GetScan)
 	scan.Get("/:id/image", scanController.GetScanImageURL)
 	scan.Delete("/:id", scanController.DeleteScan)
+
+	// Correction endpoints
+	scan.Post("/:id/correct", correctionController.CreateCorrection)
+	scan.Get("/:id/corrections", correctionController.GetCorrections)
 }

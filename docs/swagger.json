@@ -902,6 +902,116 @@
                 }
             }
         },
+        "/scan/{id}/correct": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "User can submit corrections for incorrect OCR data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Correction"
+                ],
+                "summary": "Submit a correction for scan data",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Scan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Correction data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controllers.CreateCorrectionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.CorrectionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorEnvelope"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorEnvelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/scan/{id}/corrections": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all corrections submitted for a specific scan",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Correction"
+                ],
+                "summary": "Get corrections for a scan",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Scan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.CorrectionResponse"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorEnvelope"
+                        }
+                    }
+                }
+            }
+        },
         "/scan/{id}/image": {
             "get": {
                 "security": [
@@ -956,6 +1066,21 @@
         }
     },
     "definitions": {
+        "controllers.CreateCorrectionRequest": {
+            "type": "object",
+            "required": [
+                "corrected_value",
+                "field_name"
+            ],
+            "properties": {
+                "corrected_value": {
+                    "type": "string"
+                },
+                "field_name": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.AdminStatsResponse": {
             "type": "object",
             "properties": {
@@ -1355,6 +1480,48 @@
                     "example": "user"
                 }
             }
+        },
+        "models.CorrectionResponse": {
+            "type": "object",
+            "properties": {
+                "corrected_value": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "field_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "original_value": {
+                    "type": "string"
+                },
+                "reviewed_at": {
+                    "type": "string"
+                },
+                "scan_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/models.CorrectionStatus"
+                }
+            }
+        },
+        "models.CorrectionStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "approved",
+                "rejected"
+            ],
+            "x-enum-varnames": [
+                "CorrectionStatusPending",
+                "CorrectionStatusApproved",
+                "CorrectionStatusRejected"
+            ]
         },
         "models.Insight": {
             "type": "object",

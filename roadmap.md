@@ -148,8 +148,8 @@ Tujuan: menyediakan riwayat scan dan kemampuan koreksi manual dari pengguna.
 
 * [x] Endpoint `GET /v1/scan` (paginated history)
 * [x] Simpan metadata scan (barcode, score, timestamps, image_ref)
-* [ ] Endpoint `POST /v1/scan/:id/correct` untuk koreksi data nutrisi
-* [ ] Simpan koreksi ke tabel `corrections`
+* [x] Endpoint `POST /v1/scan/:id/correct` untuk koreksi data nutrisi
+* [x] Simpan koreksi ke tabel `corrections`
 * [ ] Tampilkan hasil koreksi dalam endpoint detail scan
 
 ---

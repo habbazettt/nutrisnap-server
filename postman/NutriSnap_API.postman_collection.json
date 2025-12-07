@@ -895,6 +895,68 @@
                         "description": "Delete a scan and its associated image"
                     },
                     "response": []
+                },
+                {
+                    "name": "Submit Correction",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"field_name\": \"fat_g\",\n    \"corrected_value\": \"5.5\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/scan/{{scan_id}}/correct",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "scan",
+                                "{{scan_id}}",
+                                "correct"
+                            ]
+                        },
+                        "description": "Submit a correction for incorrect OCR data. Field names: energy_kcal, protein_g, fat_g, carbohydrate_g, sugar_g, sodium_mg, fiber_g, saturated_fat_g"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Corrections",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/scan/{{scan_id}}/corrections",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "scan",
+                                "{{scan_id}}",
+                                "corrections"
+                            ]
+                        },
+                        "description": "Get all corrections submitted for a specific scan"
+                    },
+                    "response": []
                 }
             ]
         },

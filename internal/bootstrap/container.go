@@ -31,9 +31,10 @@ type Container struct {
 	OFFClient *openfoodfacts.Client
 
 	// Repositories
-	UserRepo    repositories.UserRepository
-	ScanRepo    repositories.ScanRepository
-	ProductRepo repositories.ProductRepository
+	UserRepo       repositories.UserRepository
+	ScanRepo       repositories.ScanRepository
+	ProductRepo    repositories.ProductRepository
+	CorrectionRepo repositories.CorrectionRepository
 
 	// Services
 	AuthService    services.AuthService
@@ -47,11 +48,12 @@ type Container struct {
 	OCRWorker *workers.OCRWorker
 
 	// Controllers
-	AuthController    *controllers.AuthController
-	UserController    *controllers.UserController
-	AdminController   *controllers.AdminController
-	ScanController    *controllers.ScanController
-	ProductController *controllers.ProductController
+	AuthController       *controllers.AuthController
+	UserController       *controllers.UserController
+	AdminController      *controllers.AdminController
+	ScanController       *controllers.ScanController
+	ProductController    *controllers.ProductController
+	CorrectionController *controllers.CorrectionController
 }
 
 // NewContainer initializes all dependencies
@@ -98,6 +100,7 @@ func NewContainer() *Container {
 	userRepo := repositories.NewUserRepository(db)
 	scanRepo := repositories.NewScanRepository(db)
 	productRepo := repositories.NewProductRepository(db)
+	correctionRepo := repositories.NewCorrectionRepository(db)
 
 	// Initialize services
 	authService := services.NewAuthService(userRepo, jwtManager, googleOAuth)
@@ -112,33 +115,39 @@ func NewContainer() *Container {
 	// ScanService needs ScanQueue (implemented by ocrWorker)
 	scanService := services.NewScanService(scanRepo, storageClient, productService, ocrWorker)
 
+	// Initialize Correction Service
+	correctionService := services.NewCorrectionService(correctionRepo, scanRepo)
+
 	// Initialize controllers
 	authController := controllers.NewAuthController(authService)
 	userController := controllers.NewUserController(userService)
 	adminController := controllers.NewAdminController(adminService)
 	scanController := controllers.NewScanController(scanService)
 	productController := controllers.NewProductController(productService)
+	correctionController := controllers.NewCorrectionController(correctionService)
 
 	return &Container{
-		JWTManager:        jwtManager,
-		GoogleOAuth:       googleOAuth,
-		StorageClient:     storageClient,
-		OFFClient:         offClient,
-		UserRepo:          userRepo,
-		ScanRepo:          scanRepo,
-		ProductRepo:       productRepo,
-		AuthService:       authService,
-		UserService:       userService,
-		AdminService:      adminService,
-		ScanService:       scanService,
-		ProductService:    productService,
-		OCRService:        ocrService,
-		OCRWorker:         ocrWorker,
-		AuthController:    authController,
-		UserController:    userController,
-		AdminController:   adminController,
-		ScanController:    scanController,
-		ProductController: productController,
+		JWTManager:           jwtManager,
+		GoogleOAuth:          googleOAuth,
+		StorageClient:        storageClient,
+		OFFClient:            offClient,
+		UserRepo:             userRepo,
+		ScanRepo:             scanRepo,
+		ProductRepo:          productRepo,
+		CorrectionRepo:       correctionRepo,
+		AuthService:          authService,
+		UserService:          userService,
+		AdminService:         adminService,
+		ScanService:          scanService,
+		ProductService:       productService,
+		OCRService:           ocrService,
+		OCRWorker:            ocrWorker,
+		AuthController:       authController,
+		UserController:       userController,
+		AdminController:      adminController,
+		ScanController:       scanController,
+		ProductController:    productController,
+		CorrectionController: correctionController,
 	}
 }
 
@@ -181,6 +190,11 @@ func (c *Container) GetScanController() *controllers.ScanController {
 // GetProductController returns the product controller
 func (c *Container) GetProductController() *controllers.ProductController {
 	return c.ProductController
+}
+
+// GetCorrectionController returns the correction controller
+func (c *Container) GetCorrectionController() *controllers.CorrectionController {
+	return c.CorrectionController
 }
 
 // GetJWTManager returns the JWT manager
