@@ -10,8 +10,8 @@ const docTemplate = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "contact": {
-            "name": "NutriSnap Support",
-            "email": "support@nutrisnap.app"
+            "name": "Hubbal Kholiq Habbaza",
+            "email": "habbazahubbal@gmail.com"
         },
         "license": {
             "name": "MIT",
@@ -1263,8 +1263,18 @@ const docTemplate = `{
                 "nutri_score_value": {
                     "type": "integer"
                 },
+                "nutrients": {
+                    "$ref": "#/definitions/models.Nutrients"
+                },
+                "ocr_raw": {
+                    "description": "Debugging field",
+                    "type": "string"
+                },
                 "processing_time_ms": {
                     "type": "integer"
+                },
+                "serving_size": {
+                    "type": "string"
                 },
                 "status": {
                     "$ref": "#/definitions/models.ScanStatus"

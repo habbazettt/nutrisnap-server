@@ -16,8 +16,8 @@ import (
 // @title			NutriSnap API
 // @version			1.0.0
 // @description		API untuk memproses foto nutrition facts dan barcode
-// @contact.name	NutriSnap Support
-// @contact.email	support@nutrisnap.app
+// @contact.name	Hubbal Kholiq Habbaza
+// @contact.email	habbazahubbal@gmail.com
 // @license.name	MIT
 // @license.url		https://opensource.org/licenses/MIT
 // @host			localhost:3000

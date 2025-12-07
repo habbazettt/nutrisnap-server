@@ -25,6 +25,7 @@ Tujuan: membangun fondasi backend yang stabil, modular, aman, dan siap mensuppor
 * [x] Integrasi Swagger/OpenAPI (`/docs`)
 * [x] Integrasi Prometheus & Grafana (monitoring dasar)
 * [x] Setup API Status constants
+* [x] Timezone WIB (Asia/Jakarta) standardization
 
 ---
 
@@ -38,7 +39,7 @@ Tujuan: menyediakan autentikasi aman dan modern, sekelas aplikasi production.
 * [x] Login user (email + password)
 * [x] Generate JWT access tokens
 * [x] JWT middleware untuk protected routes
-* [x] Endpoint “Get Current User”
+* [x] Endpoint "Get Current User"
 * [x] Endpoint "Update Profile"
 * [x] Endpoint "Change Password"
 * [x] Implementasi Google OAuth2 login
@@ -77,7 +78,6 @@ Tujuan: memproses barcode untuk hasil yang cepat & akurat, sebelum OCR.
 * [x] Simpan ke tabel `products` sebagai cache
 * [x] Endpoint `GET /v1/product/:barcode`
 * [x] Fallback otomatis ke OCR jika tidak ditemukan
-* [ ] Script sync subset produk populer ke DB (Optional/Later)
 
 ---
 
@@ -88,10 +88,11 @@ Tujuan: mengubah foto nutrition facts menjadi teks mentah untuk parsing.
 ### Checklist
 
 * [x] Image preprocessing (handled by OCR lib)
-* [x] Eksekusi Tesseract OCR via CLI (gosseract)
+* [x] Eksekusi Tesseract OCR (gosseract + CGO)
 * [x] Simpan hasil raw OCR (`ocr_raw`)
 * [x] Background Worker (Queue System)
 * [x] Error handling untuk kasus foto blur atau kondisi buruk
+* [x] Bahasa Indonesia + English support
 
 ---
 
@@ -101,11 +102,13 @@ Tujuan: mengekstrak tabel gizi dari teks OCR menjadi format terstruktur.
 
 ### Checklist
 
-* [x] Fuzzy mapping nama nutrisi (Regex)
+* [x] Regex untuk nama nutrisi (Indonesia + English)
 * [x] Regex ekstraksi angka + digit cleanup
-* [x] Normalisasi unit (Dot/Comma basic handling)
-* [x] Simpan `parsed_json` ke tabel `scans`/`products`
-* [ ] Normalisasi per-100g vs per-serving (Advanced)
+* [x] Normalisasi unit (Dot/Comma handling)
+* [x] Simpan `nutrients` ke tabel `products`
+* [x] Serving Size detection (`Takaran Saji`)
+* [x] OCR Typo Correction (`cleanupOCRText`)
+* [x] Bilingual text handling (separator `/`)
 
 ---
 
@@ -122,7 +125,7 @@ Tujuan: menghasilkan interpretasi nutrisi dalam bahasa sederhana untuk pengguna 
 
 ---
 
-# **EPIC 8 — Product Comparison Engine** (Available)
+# **EPIC 8 — Product Comparison Engine**
 
 Tujuan: memungkinkan pengguna membandingkan dua produk secara objektif.
 
@@ -143,7 +146,7 @@ Tujuan: menyediakan riwayat scan dan kemampuan koreksi manual dari pengguna.
 
 ### Checklist
 
-* [x] Endpoint `GET /v1/history` (via `GET /scan?page=`)
+* [x] Endpoint `GET /v1/scan` (paginated history)
 * [x] Simpan metadata scan (barcode, score, timestamps, image_ref)
 * [ ] Endpoint `POST /v1/scan/:id/correct` untuk koreksi data nutrisi
 * [ ] Simpan koreksi ke tabel `corrections`
@@ -157,9 +160,9 @@ Tujuan: memantau performa sistem dan mendukung debugging.
 
 ### Checklist
 
-* [x] Implementasi metrics Prometheus (scan_count, barcode_hit_rate, ocr_latency)
+* [x] Implementasi metrics Prometheus
 * [x] Dashboard Grafana
-* [x] Logging terstruktur + correlation ID
+* [x] Logging terstruktur (slog)
 * [x] Endpoint `/metrics`
 
 ---
@@ -170,14 +173,6 @@ Tujuan: memastikan maintainability & onboarding developer berjalan baik.
 
 ### Checklist
 
-* [ ] `architecture.md` (flow pipeline, komponen, data alur)
 * [x] Dokumentasi folder structure
 * [x] Dokumentasi API via Swagger/OpenAPI
-* [x] Panduan local development (Task Tracker)
-
----
-
-# **NutriSnap Roadmap Finalized**
-
-Roadmap ini sengaja disederhanakan, fokus pada fitur inti yang benar-benar memberikan value kepada user awam:
-**foto → nutrition facts → insight → score → compare → history.**
+* [x] Panduan local development

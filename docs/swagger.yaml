@@ -205,8 +205,15 @@ definitions:
         type: string
       nutri_score_value:
         type: integer
+      nutrients:
+        $ref: '#/definitions/models.Nutrients'
+      ocr_raw:
+        description: Debugging field
+        type: string
       processing_time_ms:
         type: integer
+      serving_size:
+        type: string
       status:
         $ref: '#/definitions/models.ScanStatus'
       user_id:
@@ -389,8 +396,8 @@ definitions:
 host: localhost:3000
 info:
   contact:
-    email: support@nutrisnap.app
-    name: NutriSnap Support
+    email: habbazahubbal@gmail.com
+    name: Hubbal Kholiq Habbaza
   description: API untuk memproses foto nutrition facts dan barcode
   license:
     name: MIT
