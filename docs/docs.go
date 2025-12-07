@@ -496,6 +496,63 @@ const docTemplate = `{
                 }
             }
         },
+        "/compare": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Compare nutritional values of two products and get verdict on which is healthier",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Compare"
+                ],
+                "summary": "Compare two products",
+                "parameters": [
+                    {
+                        "description": "Products to compare (barcode or scan_id)",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CompareRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.CompareResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorEnvelope"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorEnvelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorEnvelope"
+                        }
+                    }
+                }
+            }
+        },
         "/healthz": {
             "get": {
                 "description": "Check if the API is running",
@@ -1193,6 +1250,51 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.CompareRequest": {
+            "description": "Product comparison request",
+            "type": "object",
+            "required": [
+                "product_a",
+                "product_b"
+            ],
+            "properties": {
+                "product_a": {
+                    "type": "string",
+                    "example": "8992761136000"
+                },
+                "product_b": {
+                    "type": "string",
+                    "example": "8992388163138"
+                }
+            }
+        },
+        "dto.CompareResponse": {
+            "description": "Product comparison result",
+            "type": "object",
+            "properties": {
+                "comparisons": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.NutrientComparison"
+                    }
+                },
+                "product_a": {
+                    "$ref": "#/definitions/dto.ProductSummary"
+                },
+                "product_b": {
+                    "$ref": "#/definitions/dto.ProductSummary"
+                },
+                "verdict": {
+                    "type": "string",
+                    "example": "Product A lebih sehat karena memiliki NutriScore lebih baik (B vs D)"
+                },
+                "winner": {
+                    "description": "\"a\", \"b\", or \"tie\"",
+                    "type": "string",
+                    "example": "a"
+                }
+            }
+        },
         "dto.HealthResponse": {
             "description": "Health check response data",
             "type": "object",
@@ -1257,6 +1359,41 @@ const docTemplate = `{
                 "message": {
                     "type": "string",
                     "example": "Operation successful"
+                }
+            }
+        },
+        "dto.NutrientComparison": {
+            "description": "Single nutrient comparison result",
+            "type": "object",
+            "properties": {
+                "difference": {
+                    "type": "number",
+                    "example": -14.5
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Sugar"
+                },
+                "note": {
+                    "type": "string",
+                    "example": "Product A has 58% less sugar"
+                },
+                "unit": {
+                    "type": "string",
+                    "example": "g"
+                },
+                "value_a": {
+                    "type": "number",
+                    "example": 10.5
+                },
+                "value_b": {
+                    "type": "number",
+                    "example": 25
+                },
+                "winner": {
+                    "description": "\"a\", \"b\", or \"tie\"",
+                    "type": "string",
+                    "example": "a"
                 }
             }
         },
@@ -1338,6 +1475,31 @@ const docTemplate = `{
                 },
                 "source": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.ProductSummary": {
+            "description": "Product summary for comparison",
+            "type": "object",
+            "properties": {
+                "barcode": {
+                    "type": "string",
+                    "example": "8992761136000"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Teh Botol Sosro"
+                },
+                "nutri_score": {
+                    "type": "string",
+                    "example": "B"
                 }
             }
         },

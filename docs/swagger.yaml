@@ -85,6 +85,39 @@ definitions:
     - current_password
     - new_password
     type: object
+  dto.CompareRequest:
+    description: Product comparison request
+    properties:
+      product_a:
+        example: "8992761136000"
+        type: string
+      product_b:
+        example: "8992388163138"
+        type: string
+    required:
+    - product_a
+    - product_b
+    type: object
+  dto.CompareResponse:
+    description: Product comparison result
+    properties:
+      comparisons:
+        items:
+          $ref: '#/definitions/dto.NutrientComparison'
+        type: array
+      product_a:
+        $ref: '#/definitions/dto.ProductSummary'
+      product_b:
+        $ref: '#/definitions/dto.ProductSummary'
+      verdict:
+        example: Product A lebih sehat karena memiliki NutriScore lebih baik (B vs
+          D)
+        type: string
+      winner:
+        description: '"a", "b", or "tie"'
+        example: a
+        type: string
+    type: object
   dto.HealthResponse:
     description: Health check response data
     properties:
@@ -130,6 +163,32 @@ definitions:
     properties:
       message:
         example: Operation successful
+        type: string
+    type: object
+  dto.NutrientComparison:
+    description: Single nutrient comparison result
+    properties:
+      difference:
+        example: -14.5
+        type: number
+      name:
+        example: Sugar
+        type: string
+      note:
+        example: Product A has 58% less sugar
+        type: string
+      unit:
+        example: g
+        type: string
+      value_a:
+        example: 10.5
+        type: number
+      value_b:
+        example: 25
+        type: number
+      winner:
+        description: '"a", "b", or "tie"'
+        example: a
         type: string
     type: object
   dto.PaginatedScansResponse:
@@ -183,6 +242,24 @@ definitions:
       serving_size:
         type: string
       source:
+        type: string
+    type: object
+  dto.ProductSummary:
+    description: Product summary for comparison
+    properties:
+      barcode:
+        example: "8992761136000"
+        type: string
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      image_url:
+        type: string
+      name:
+        example: Teh Botol Sosro
+        type: string
+      nutri_score:
+        example: B
         type: string
     type: object
   dto.RefreshTokenRequest:
@@ -749,6 +826,43 @@ paths:
       summary: Register new user
       tags:
       - Auth
+  /compare:
+    post:
+      consumes:
+      - application/json
+      description: Compare nutritional values of two products and get verdict on which
+        is healthier
+      parameters:
+      - description: Products to compare (barcode or scan_id)
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CompareRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.CompareResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Compare two products
+      tags:
+      - Compare
   /healthz:
     get:
       consumes:

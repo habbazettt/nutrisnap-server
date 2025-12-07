@@ -19,7 +19,7 @@ Backend API untuk **NutriSnap** - platform yang memproses foto nutrition facts a
 
 ## Project Structure
 
-```
+```text
 nutrisnap-server/
 ├── cmd/api/                  # Entry point
 ├── config/                   # Configuration loader
@@ -149,11 +149,6 @@ go run ./cmd/api/main.go
 | MinIO Console | <http://localhost:9011> |
 | Prometheus | <http://localhost:9090> |
 | Grafana | <http://localhost:3001> |
-
-### Grafana Login
-
-- **Username**: admin
-- **Password**: admin
 
 ## Environment Variables
 

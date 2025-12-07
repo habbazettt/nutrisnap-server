@@ -15,6 +15,7 @@ type Container interface {
 	GetScanController() *controllers.ScanController
 	GetProductController() *controllers.ProductController
 	GetCorrectionController() *controllers.CorrectionController
+	GetCompareController() *controllers.CompareController
 	GetJWTManager() *jwt.Manager
 }
 
@@ -35,7 +36,7 @@ func SetupRoutes(app *fiber.App, container Container) {
 	SetupAdminRoutes(v1, container.GetAdminController(), container.GetJWTManager())
 	SetupScanRoutes(v1, container.GetScanController(), container.GetCorrectionController(), container.GetJWTManager())
 	SetupProductRoutes(v1, container.GetProductController(), container.GetJWTManager())
-	SetupCompareRoutes(v1)
+	SetupCompareRoutes(v1, container.GetCompareController(), container.GetJWTManager())
 	SetupHistoryRoutes(v1)
 
 	// 404 Handler - must be last

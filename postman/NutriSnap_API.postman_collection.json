@@ -990,6 +990,44 @@
                     "response": []
                 }
             ]
+        },
+        {
+            "name": "Compare",
+            "item": [
+                {
+                    "name": "Compare Products",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"product_a\": \"8992761136000\",\n    \"product_b\": \"8997020110143\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/compare",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "compare"
+                            ]
+                        },
+                        "description": "Compare two products by barcode or scan_id. Returns nutritional comparison and verdict on which is healthier."
+                    },
+                    "response": []
+                }
+            ]
         }
     ]
 }

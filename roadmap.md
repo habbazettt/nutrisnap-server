@@ -131,12 +131,12 @@ Tujuan: memungkinkan pengguna membandingkan dua produk secara objektif.
 
 ### Checklist
 
-* [ ] Endpoint `POST /v1/compare`
-* [ ] Ambil dua produk via barcode atau scan_id
-* [ ] Normalize kedua produk ke basis per-100g
-* [ ] Hitung delta absolut & persentase
-* [ ] Generate verdict (human readable)
-* [ ] Return JSON structured comparison
+* [x] Endpoint `POST /v1/compare`
+* [x] Ambil dua produk via barcode atau scan_id
+* [x] Normalize kedua produk ke basis per-100g
+* [x] Hitung delta absolut & persentase
+* [x] Generate verdict (human readable)
+* [x] Return JSON structured comparison
 
 ---
 
@@ -150,7 +150,7 @@ Tujuan: menyediakan riwayat scan dan kemampuan koreksi manual dari pengguna.
 * [x] Simpan metadata scan (barcode, score, timestamps, image_ref)
 * [x] Endpoint `POST /v1/scan/:id/correct` untuk koreksi data nutrisi
 * [x] Simpan koreksi ke tabel `corrections`
-* [ ] Tampilkan hasil koreksi dalam endpoint detail scan
+* [x] User dapat langsung mengoreksi data (tanpa review admin)
 
 ---
 

@@ -54,6 +54,7 @@ type Container struct {
 	ScanController       *controllers.ScanController
 	ProductController    *controllers.ProductController
 	CorrectionController *controllers.CorrectionController
+	CompareController    *controllers.CompareController
 }
 
 // NewContainer initializes all dependencies
@@ -126,6 +127,10 @@ func NewContainer() *Container {
 	productController := controllers.NewProductController(productService)
 	correctionController := controllers.NewCorrectionController(correctionService)
 
+	// Initialize Compare Service and Controller
+	compareService := services.NewCompareService(productRepo, scanRepo)
+	compareController := controllers.NewCompareController(compareService)
+
 	return &Container{
 		JWTManager:           jwtManager,
 		GoogleOAuth:          googleOAuth,
@@ -148,6 +153,7 @@ func NewContainer() *Container {
 		ScanController:       scanController,
 		ProductController:    productController,
 		CorrectionController: correctionController,
+		CompareController:    compareController,
 	}
 }
 
@@ -195,6 +201,11 @@ func (c *Container) GetProductController() *controllers.ProductController {
 // GetCorrectionController returns the correction controller
 func (c *Container) GetCorrectionController() *controllers.CorrectionController {
 	return c.CorrectionController
+}
+
+// GetCompareController returns the compare controller
+func (c *Container) GetCompareController() *controllers.CompareController {
+	return c.CompareController
 }
 
 // GetJWTManager returns the JWT manager
