@@ -1,10 +1,38 @@
 basePath: /api/v1
 definitions:
-  controllers.CreateCorrectionRequest:
+  controllers.CorrectionResult:
+    description: Correction result
     properties:
       corrected_value:
+        example: "5.5"
+        type: string
+      created_at:
+        example: "2025-12-07T15:00:00+07:00"
         type: string
       field_name:
+        example: fat_g
+        type: string
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      original_value:
+        example: "0.5"
+        type: string
+      scan_id:
+        example: 550e8400-e29b-41d4-a716-446655440001
+        type: string
+      status:
+        example: pending
+        type: string
+    type: object
+  controllers.CreateCorrectionRequest:
+    description: Correction submission request
+    properties:
+      corrected_value:
+        example: "5.5"
+        type: string
+      field_name:
+        example: fat_g
         type: string
     required:
     - corrected_value
@@ -283,35 +311,6 @@ definitions:
         example: user
         type: string
     type: object
-  models.CorrectionResponse:
-    properties:
-      corrected_value:
-        type: string
-      created_at:
-        type: string
-      field_name:
-        type: string
-      id:
-        type: string
-      original_value:
-        type: string
-      reviewed_at:
-        type: string
-      scan_id:
-        type: string
-      status:
-        $ref: '#/definitions/models.CorrectionStatus'
-    type: object
-  models.CorrectionStatus:
-    enum:
-    - pending
-    - approved
-    - rejected
-    type: string
-    x-enum-varnames:
-    - CorrectionStatusPending
-    - CorrectionStatusApproved
-    - CorrectionStatusRejected
   models.Insight:
     properties:
       message:
@@ -1036,7 +1035,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.CorrectionResponse'
+            $ref: '#/definitions/controllers.CorrectionResult'
         "400":
           description: Bad Request
           schema:
@@ -1072,7 +1071,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.CorrectionResponse'
+              $ref: '#/definitions/controllers.CorrectionResult'
             type: array
         "401":
           description: Unauthorized

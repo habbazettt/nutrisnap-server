@@ -948,7 +948,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.CorrectionResponse"
+                            "$ref": "#/definitions/controllers.CorrectionResult"
                         }
                     },
                     "400": {
@@ -1005,7 +1005,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.CorrectionResponse"
+                                "$ref": "#/definitions/controllers.CorrectionResult"
                             }
                         }
                     },
@@ -1072,7 +1072,42 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "controllers.CorrectionResult": {
+            "description": "Correction result",
+            "type": "object",
+            "properties": {
+                "corrected_value": {
+                    "type": "string",
+                    "example": "5.5"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2025-12-07T15:00:00+07:00"
+                },
+                "field_name": {
+                    "type": "string",
+                    "example": "fat_g"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "original_value": {
+                    "type": "string",
+                    "example": "0.5"
+                },
+                "scan_id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440001"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "pending"
+                }
+            }
+        },
         "controllers.CreateCorrectionRequest": {
+            "description": "Correction submission request",
             "type": "object",
             "required": [
                 "corrected_value",
@@ -1080,10 +1115,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "corrected_value": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "5.5"
                 },
                 "field_name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "fat_g"
                 }
             }
         },
@@ -1486,48 +1523,6 @@ const docTemplate = `{
                     "example": "user"
                 }
             }
-        },
-        "models.CorrectionResponse": {
-            "type": "object",
-            "properties": {
-                "corrected_value": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "field_name": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "original_value": {
-                    "type": "string"
-                },
-                "reviewed_at": {
-                    "type": "string"
-                },
-                "scan_id": {
-                    "type": "string"
-                },
-                "status": {
-                    "$ref": "#/definitions/models.CorrectionStatus"
-                }
-            }
-        },
-        "models.CorrectionStatus": {
-            "type": "string",
-            "enum": [
-                "pending",
-                "approved",
-                "rejected"
-            ],
-            "x-enum-varnames": [
-                "CorrectionStatusPending",
-                "CorrectionStatusApproved",
-                "CorrectionStatusRejected"
-            ]
         },
         "models.Insight": {
             "type": "object",
