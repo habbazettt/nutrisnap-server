@@ -1,0 +1,52 @@
+basePath: /api/v1
+definitions:
+  dto.HealthResponse:
+    description: Health check response data
+    properties:
+      service:
+        example: nutrisnap-api
+        type: string
+      status:
+        example: healthy
+        type: string
+      timestamp:
+        example: "2024-12-07T10:00:00Z"
+        type: string
+      version:
+        example: 1.0.0
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact:
+    email: support@nutrisnap.app
+    name: NutriSnap Support
+  description: API untuk memproses foto nutrition facts dan barcode
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: NutriSnap API
+  version: 1.0.0
+paths:
+  /healthz:
+    get:
+      consumes:
+      - application/json
+      description: Check if the API is running
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.HealthResponse'
+      summary: Health Check
+      tags:
+      - Health
+securityDefinitions:
+  BearerAuth:
+    description: 'JWT token dengan format: Bearer {token}'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

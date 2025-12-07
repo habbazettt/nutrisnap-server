@@ -3,8 +3,11 @@ FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
 
-# Install git for fetching dependencies
-RUN apk add --no-cache git
+# Install git and build dependencies
+RUN apk add --no-cache git build-base
+
+# Install swag CLI for Swagger docs generation
+RUN go install github.com/swaggo/swag/cmd/swag@latest
 
 # Copy go mod files
 COPY go.mod go.sum ./
@@ -14,6 +17,9 @@ RUN go mod download
 
 # Copy source code
 COPY . .
+
+# Generate Swagger docs
+RUN CGO_ENABLED=0 swag init -g cmd/api/main.go -o docs --parseDependency --parseInternal
 
 # Build the application
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd/api

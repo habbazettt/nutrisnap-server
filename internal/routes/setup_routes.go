@@ -13,6 +13,7 @@ func SetupRoutes(app *fiber.App) {
 
 	// Register all route groups
 	SetupHealthRoutes(app, v1)
+	SetupDocsRoutes(app)
 	SetupAuthRoutes(v1)
 	SetupScanRoutes(v1)
 	SetupProductRoutes(v1)

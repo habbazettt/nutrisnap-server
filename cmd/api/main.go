@@ -9,8 +9,23 @@ import (
 	"github.com/habbazettt/nutrisnap-server/internal/bootstrap"
 	"github.com/habbazettt/nutrisnap-server/pkg/database"
 	"github.com/habbazettt/nutrisnap-server/pkg/logger"
+
+	_ "github.com/habbazettt/nutrisnap-server/docs"
 )
 
+// @title			NutriSnap API
+// @version			1.0.0
+// @description		API untuk memproses foto nutrition facts dan barcode
+// @contact.name	NutriSnap Support
+// @contact.email	support@nutrisnap.app
+// @license.name	MIT
+// @license.url		https://opensource.org/licenses/MIT
+// @host			localhost:3000
+// @BasePath		/api/v1
+// @securityDefinitions.apikey	BearerAuth
+// @in							header
+// @name						Authorization
+// @description				JWT token dengan format: Bearer {token}
 func main() {
 	cfg := loadConfig()
 

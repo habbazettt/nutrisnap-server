@@ -28,6 +28,8 @@ nutrisnap-server/
 │   └── services/             # Business logic
 ├── pkg/
 │   └── utils/                # Shared utilities
+├── docs/
+│   └── swagger.yaml          # API documentation
 ├── go.mod
 ├── go.sum
 └── README.md
@@ -80,18 +82,18 @@ Server will start at `http://localhost:3000`
 
 ## Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PORT` | Server port | `3000` |
-| `DB_HOST` | PostgreSQL host | `localhost` |
-| `DB_PORT` | PostgreSQL port | `5432` |
-| `DB_USER` | PostgreSQL user | `nutrisnap` |
-| `DB_PASSWORD` | PostgreSQL password | `nutrisnap_secret` |
-| `DB_NAME` | PostgreSQL database | `nutrisnap_db` |
-| `MINIO_ENDPOINT` | MinIO endpoint | `localhost:9000` |
-| `MINIO_ACCESS_KEY` | MinIO access key | `minioadmin` |
-| `MINIO_SECRET_KEY` | MinIO secret key | `minioadmin` |
-| `MINIO_BUCKET` | MinIO bucket name | `nutrisnap` |
+| Variable | Description |
+|----------|-------------|
+| `PORT` | Server port |
+| `DB_HOST` | PostgreSQL host |
+| `DB_PORT` | PostgreSQL port |
+| `DB_USER` | PostgreSQL user |
+| `DB_PASSWORD` | PostgreSQL password |
+| `DB_NAME` | PostgreSQL database |
+| `MINIO_ENDPOINT` | MinIO endpoint |
+| `MINIO_ACCESS_KEY` | MinIO access key |
+| `MINIO_SECRET_KEY` | MinIO secret key |
+| `MINIO_BUCKET` | MinIO bucket name |
 
 ## Docker Compose
 
@@ -130,6 +132,7 @@ docker-compose ps
 - **API Health**: <http://localhost:3000/healthz>
 - **Adminer**: <http://localhost:8080>
 - **MinIO Console**: <http://localhost:9001>
+- **Swagger Docs**: <http://localhost:3000/docs>
 
 ## License
 
