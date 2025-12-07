@@ -35,7 +35,7 @@ Tujuan: menyediakan autentikasi aman dan modern, sekelas aplikasi production.
 ### Checklist
 
 * [x] Registrasi user (email + password hash)
-* [ ] Login user (email + password)
+* [x] Login user (email + password)
 * [ ] Implementasi Google OAuth2 login
 * [ ] Model OAuthAccount + relasi ke User
 * [ ] Generate JWT access tokens
