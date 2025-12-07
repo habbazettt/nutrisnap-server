@@ -43,7 +43,7 @@ Tujuan: menyediakan autentikasi aman dan modern, sekelas aplikasi production.
 * [x] Endpoint "Change Password"
 * [x] Implementasi Google OAuth2 login
 * [x] Model OAuthAccount + relasi ke User
-* [ ] Role-based access (user, admin)
+* [x] Role-based access (user, admin)
 
 ---
 

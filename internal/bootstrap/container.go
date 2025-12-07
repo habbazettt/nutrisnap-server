@@ -22,12 +22,14 @@ type Container struct {
 	UserRepo repositories.UserRepository
 
 	// Services
-	AuthService services.AuthService
-	UserService services.UserService
+	AuthService  services.AuthService
+	UserService  services.UserService
+	AdminService services.AdminService
 
 	// Controllers
-	AuthController *controllers.AuthController
-	UserController *controllers.UserController
+	AuthController  *controllers.AuthController
+	UserController  *controllers.UserController
+	AdminController *controllers.AdminController
 }
 
 // NewContainer initializes all dependencies
@@ -56,19 +58,23 @@ func NewContainer() *Container {
 	// Initialize services
 	authService := services.NewAuthService(userRepo, jwtManager, googleOAuth)
 	userService := services.NewUserService(userRepo)
+	adminService := services.NewAdminService(userRepo)
 
 	// Initialize controllers
 	authController := controllers.NewAuthController(authService)
 	userController := controllers.NewUserController(userService)
+	adminController := controllers.NewAdminController(adminService)
 
 	return &Container{
-		JWTManager:     jwtManager,
-		GoogleOAuth:    googleOAuth,
-		UserRepo:       userRepo,
-		AuthService:    authService,
-		UserService:    userService,
-		AuthController: authController,
-		UserController: userController,
+		JWTManager:      jwtManager,
+		GoogleOAuth:     googleOAuth,
+		UserRepo:        userRepo,
+		AuthService:     authService,
+		UserService:     userService,
+		AdminService:    adminService,
+		AuthController:  authController,
+		UserController:  userController,
+		AdminController: adminController,
 	}
 }
 
@@ -96,6 +102,11 @@ func (c *Container) GetAuthController() *controllers.AuthController {
 // GetUserController returns the user controller
 func (c *Container) GetUserController() *controllers.UserController {
 	return c.UserController
+}
+
+// GetAdminController returns the admin controller
+func (c *Container) GetAdminController() *controllers.AdminController {
+	return c.AdminController
 }
 
 // GetJWTManager returns the JWT manager
