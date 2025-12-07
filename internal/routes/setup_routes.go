@@ -37,7 +37,6 @@ func SetupRoutes(app *fiber.App, container Container) {
 	SetupScanRoutes(v1, container.GetScanController(), container.GetCorrectionController(), container.GetJWTManager())
 	SetupProductRoutes(v1, container.GetProductController(), container.GetJWTManager())
 	SetupCompareRoutes(v1, container.GetCompareController(), container.GetJWTManager())
-	SetupHistoryRoutes(v1)
 
 	// 404 Handler - must be last
 	app.Use(notFoundHandler)
