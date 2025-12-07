@@ -3,12 +3,15 @@ package routes
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/habbazettt/nutrisnap-server/internal/controllers"
+	"github.com/habbazettt/nutrisnap-server/pkg/jwt"
 	"github.com/habbazettt/nutrisnap-server/pkg/response"
 )
 
 // Container defines the interface for dependency injection
 type Container interface {
 	GetAuthController() *controllers.AuthController
+	GetUserController() *controllers.UserController
+	GetJWTManager() *jwt.Manager
 }
 
 // SetupRoutes is the main registry that registers all routes
@@ -24,6 +27,7 @@ func SetupRoutes(app *fiber.App, container Container) {
 	SetupHealthRoutes(app, v1)
 	SetupDocsRoutes(app)
 	SetupAuthRoutes(v1, container.GetAuthController())
+	SetupUserRoutes(v1, container.GetUserController(), container.GetJWTManager())
 	SetupScanRoutes(v1)
 	SetupProductRoutes(v1)
 	SetupCompareRoutes(v1)

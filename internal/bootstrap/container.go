@@ -19,9 +19,11 @@ type Container struct {
 
 	// Services
 	AuthService services.AuthService
+	UserService services.UserService
 
 	// Controllers
 	AuthController *controllers.AuthController
+	UserController *controllers.UserController
 }
 
 // NewContainer initializes all dependencies
@@ -42,15 +44,19 @@ func NewContainer() *Container {
 
 	// Initialize services
 	authService := services.NewAuthService(userRepo, jwtManager)
+	userService := services.NewUserService(userRepo)
 
 	// Initialize controllers
 	authController := controllers.NewAuthController(authService)
+	userController := controllers.NewUserController(userService)
 
 	return &Container{
 		JWTManager:     jwtManager,
 		UserRepo:       userRepo,
 		AuthService:    authService,
+		UserService:    userService,
 		AuthController: authController,
+		UserController: userController,
 	}
 }
 
@@ -73,4 +79,14 @@ func InitContainer() {
 // GetAuthController returns the auth controller
 func (c *Container) GetAuthController() *controllers.AuthController {
 	return c.AuthController
+}
+
+// GetUserController returns the user controller
+func (c *Container) GetUserController() *controllers.UserController {
+	return c.UserController
+}
+
+// GetJWTManager returns the JWT manager
+func (c *Container) GetJWTManager() *jwt.Manager {
+	return c.JWTManager
 }
