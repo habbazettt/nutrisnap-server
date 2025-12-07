@@ -7,6 +7,9 @@ import (
 
 // SetupRoutes is the main registry that registers all routes
 func SetupRoutes(app *fiber.App) {
+	// Metrics (before other routes for middleware)
+	SetupMetricsRoutes(app)
+
 	// API group
 	api := app.Group("/api")
 	v1 := api.Group("/v1")

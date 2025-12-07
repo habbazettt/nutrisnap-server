@@ -1,0 +1,154 @@
+{
+    "info": {
+        "name": "NutriSnap API",
+        "description": "Collection untuk testing NutriSnap API - EPIC 1",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:3000",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Health Check",
+            "item": [
+                {
+                    "name": "Root Health Check",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/healthz",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "healthz"
+                            ]
+                        },
+                        "description": "Check if the API is running"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "API v1 Health Check",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/health",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "health"
+                            ]
+                        },
+                        "description": "Check API v1 health status"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Documentation",
+            "item": [
+                {
+                    "name": "Swagger UI",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/docs/index.html",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "docs",
+                                "index.html"
+                            ]
+                        },
+                        "description": "Access Swagger UI documentation"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Metrics",
+            "item": [
+                {
+                    "name": "Prometheus Metrics",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/metrics",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "metrics"
+                            ]
+                        },
+                        "description": "Get Prometheus metrics"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Error Handling",
+            "item": [
+                {
+                    "name": "404 Not Found",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/nonexistent",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "nonexistent"
+                            ]
+                        },
+                        "description": "Test 404 error response"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Rate Limiting",
+            "item": [
+                {
+                    "name": "Rate Limit Test",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/healthz",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "healthz"
+                            ]
+                        },
+                        "description": "Send multiple requests to test rate limiting (100 req/min)"
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ]
+}

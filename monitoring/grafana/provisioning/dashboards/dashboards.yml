@@ -1,0 +1,13 @@
+apiVersion: 1
+
+providers:
+  - name: 'NutriSnap Dashboards'
+    orgId: 1
+    folder: 'NutriSnap'
+    folderUid: 'nutrisnap'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards

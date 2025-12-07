@@ -4,87 +4,131 @@ Backend API untuk **NutriSnap** - platform yang memproses foto nutrition facts a
 
 ## Tech Stack
 
-- **Language**: Go 1.24+
-- **Framework**: [Fiber](https://gofiber.io/) v2
-- **Database**: PostgreSQL + GORM
-- **Storage**: MinIO (S3-compatible)
-- **OCR**: Tesseract
-- **Containerization**: Docker & Docker Compose
+| Category | Technology |
+|----------|------------|
+| **Language** | Go 1.24+ |
+| **Framework** | Fiber v2 |
+| **Database** | PostgreSQL 15 + GORM |
+| **Storage** | MinIO (S3-compatible) |
+| **OCR** | Tesseract |
+| **Docs** | Swagger/OpenAPI |
+| **Monitoring** | Prometheus + Grafana |
+| **Container** | Docker & Docker Compose |
 
 ## Project Structure
 
 ```
 nutrisnap-server/
-├── cmd/
-│   └── api/
-│       └── main.go          # Entry point
-├── config/                   # Configuration files
+├── cmd/api/                  # Entry point
+├── config/                   # Configuration loader
+├── docs/                     # Swagger documentation
 ├── internal/
+│   ├── bootstrap/            # App initialization
 │   ├── controllers/          # HTTP handlers
+│   ├── dto/                  # Data transfer objects
 │   ├── middleware/           # Custom middleware
 │   ├── models/               # Database models
 │   ├── repositories/         # Data access layer
 │   ├── routes/               # Route definitions
 │   └── services/             # Business logic
+├── monitoring/
+│   ├── prometheus/           # Prometheus config
+│   └── grafana/              # Grafana provisioning
 ├── pkg/
-│   └── utils/                # Shared utilities
-├── docs/
-│   └── swagger.yaml          # API documentation
-├── go.mod
-├── go.sum
-└── README.md
+│   ├── database/             # Database connection
+│   ├── logger/               # Structured logging
+│   └── response/             # API response helpers
+└── docker-compose.yml
 ```
 
-## Getting Started
+## Quick Start
 
-### Prerequisites
-
-- Go 1.24 or higher
-- Docker & Docker Compose (optional, for full stack)
-
-### Installation
-
-1. Clone the repository
+### With Docker (Recommended)
 
 ```bash
+# Clone repository
 git clone https://github.com/habbazettt/nutrisnap-server.git
 cd nutrisnap-server
+
+# Copy environment file
+cp .env.example .env
+
+# Start all services
+docker-compose up -d
+
+# Check services
+docker-compose ps
 ```
 
-2. Install dependencies
+### Without Docker
 
 ```bash
+# Install dependencies
 go mod tidy
-```
 
-3. Run the server
+# Generate Swagger docs
+swag init -g cmd/api/main.go -o docs
 
-```bash
+# Run server
 go run ./cmd/api/main.go
 ```
 
-Server will start at `http://localhost:3000`
-
 ## API Endpoints
 
-### Health Check
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/healthz` | Health check |
+| GET | `/api/v1/health` | API v1 health check |
+| GET | `/docs/*` | Swagger UI |
+| GET | `/metrics` | Prometheus metrics |
 
-- `GET /healthz` - System health check
-- `GET /v1/health` - API v1 health check
+### Coming Soon (EPIC 2-9)
 
-### Coming Soon
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/auth/register` | User registration |
+| POST | `/api/v1/auth/login` | User login |
+| POST | `/api/v1/scan` | Upload nutrition image |
+| GET | `/api/v1/scan/:id` | Get scan result |
+| GET | `/api/v1/product/:barcode` | Get product by barcode |
+| POST | `/api/v1/compare` | Compare products |
+| GET | `/api/v1/history` | Scan history |
 
-- `POST /v1/scan` - Upload nutrition facts image
-- `GET /v1/scan/:id` - Get scan result
-- `GET /v1/product/:barcode` - Get product by barcode
-- `POST /v1/compare` - Compare two products
-- `GET /v1/history` - Get scan history
+## Services
+
+| Service | Port | Description |
+|---------|------|-------------|
+| **app** | 3000 | NutriSnap API |
+| **postgres** | 5432 | PostgreSQL 15 |
+| **adminer** | 8080 | Database UI |
+| **minio** | 9010, 9011 | Object Storage |
+| **prometheus** | 9090 | Metrics Collection |
+| **grafana** | 3001 | Metrics Dashboard |
+
+## Access URLs
+
+| Service | URL |
+|---------|-----|
+| API | <http://localhost:3000> |
+| Swagger Docs | <http://localhost:3000/docs> |
+| Metrics | <http://localhost:3000/metrics> |
+| Adminer | <http://localhost:8080> |
+| MinIO Console | <http://localhost:9011> |
+| Prometheus | <http://localhost:9090> |
+| Grafana | <http://localhost:3001> |
+
+### Grafana Login
+
+- **Username**: admin
+- **Password**: admin
 
 ## Environment Variables
 
 | Variable | Description |
 |----------|-------------|
 | `PORT` | Server port |
+| `ENV` | Environment (development/production) |
+| `LOG_LEVEL` | Log level (debug/info/warn/error) |
 | `DB_HOST` | PostgreSQL host |
 | `DB_PORT` | PostgreSQL port |
 | `DB_USER` | PostgreSQL user |
@@ -93,47 +137,20 @@ Server will start at `http://localhost:3000`
 | `MINIO_ENDPOINT` | MinIO endpoint |
 | `MINIO_ACCESS_KEY` | MinIO access key |
 | `MINIO_SECRET_KEY` | MinIO secret key |
-| `MINIO_BUCKET` | MinIO bucket name |
+| `GRAFANA_USER` | Grafana admin user |
+| `GRAFANA_PASSWORD` | Grafana admin password |
 
-## Docker Compose
+## Features
 
-### Quick Start with Docker
-
-1. Copy environment file
-
-```bash
-cp .env.example .env
-```
-
-2. Start all services
-
-```bash
-docker-compose up -d
-```
-
-3. Check running services
-
-```bash
-docker-compose ps
-```
-
-### Services
-
-| Service | Port | Description |
-|---------|------|-------------|
-| `app` | 3000 | NutriSnap API |
-| `postgres` | 5432 | PostgreSQL 15 Database |
-| `adminer` | 8080 | Database Management UI |
-| `minio` | 9000, 9001 | S3-Compatible Object Storage |
-
-### Access URLs
-
-- **API**: <http://localhost:3000>
-- **API Health**: <http://localhost:3000/healthz>
-- **Adminer**: <http://localhost:8080>
-- **MinIO Console**: <http://localhost:9001>
-- **Swagger Docs**: <http://localhost:3000/docs>
+- ✅ Structured logging with slog
+- ✅ Rate limiting (100 req/min default)
+- ✅ API response envelope
+- ✅ Swagger/OpenAPI documentation
+- ✅ Prometheus metrics
+- ✅ Grafana dashboard (auto-provisioned)
+- ✅ GORM with auto-migration
+- ✅ Graceful shutdown
 
 ## License
 
-MIT License
+MIT License - see [LICENSE](LICENSE)
