@@ -63,6 +63,46 @@ func (c *AuthController) Register(ctx *fiber.Ctx) error {
 	return response.Created(ctx, result)
 }
 
+// Login godoc
+// @Summary		Login user
+// @Description	Authenticate user with email and password
+// @Tags		Auth
+// @Accept		json
+// @Produce		json
+// @Param		body	body		dto.LoginRequest	true	"Login credentials"
+// @Success		200		{object}	dto.LoginResponse
+// @Failure		400		{object}	response.ErrorEnvelope
+// @Failure		401		{object}	response.ErrorEnvelope
+// @Router		/auth/login [post]
+func (c *AuthController) Login(ctx *fiber.Ctx) error {
+	var req dto.LoginRequest
+
+	// Parse body
+	if err := ctx.BodyParser(&req); err != nil {
+		return response.BadRequest(ctx, constants.GetStatusMessage(constants.StatusInvalidJSON))
+	}
+
+	// Validate request
+	if err := c.validate.Struct(&req); err != nil {
+		validationErrors := c.formatValidationErrors(err)
+		return response.ValidationErrors(ctx, validationErrors)
+	}
+
+	// Call service
+	result, err := c.authService.Login(&req)
+	if err != nil {
+		if errors.Is(err, services.ErrInvalidCredentials) {
+			return response.Error(ctx,
+				constants.GetHTTPStatus(constants.StatusInvalidCredentials),
+				constants.GetStatusMessage(constants.StatusInvalidCredentials),
+			)
+		}
+		return response.InternalError(ctx, "Failed to login")
+	}
+
+	return response.Success(ctx, result)
+}
+
 func (c *AuthController) formatValidationErrors(err error) []response.ErrorDetail {
 	var errors []response.ErrorDetail
 

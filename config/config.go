@@ -40,8 +40,10 @@ type MinIOConfig struct {
 }
 
 type JWTConfig struct {
-	Secret string
-	Expiry time.Duration
+	Secret        string
+	AccessExpiry  time.Duration
+	RefreshExpiry time.Duration
+	Issuer        string
 }
 
 var cfg *Config
@@ -71,8 +73,10 @@ func Load() (*Config, error) {
 			ConsolePort: getEnv("MINIO_CONSOLE_PORT", "9011"),
 		},
 		JWT: JWTConfig{
-			Secret: getEnv("JWT_SECRET", ""),
-			Expiry: getEnvDuration("JWT_EXPIRY", 30*time.Minute),
+			Secret:        getEnv("JWT_SECRET", "nutrisnap-secret-key-change-in-production"),
+			AccessExpiry:  getEnvDuration("JWT_ACCESS_EXPIRY", 30*time.Minute),
+			RefreshExpiry: getEnvDuration("JWT_REFRESH_EXPIRY", 7*24*time.Hour),
+			Issuer:        getEnv("JWT_ISSUER", "nutrisnap-api"),
 		},
 	}
 

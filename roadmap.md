@@ -36,9 +36,9 @@ Tujuan: menyediakan autentikasi aman dan modern, sekelas aplikasi production.
 
 * [x] Registrasi user (email + password hash)
 * [x] Login user (email + password)
+* [x] Generate JWT access tokens
 * [ ] Implementasi Google OAuth2 login
 * [ ] Model OAuthAccount + relasi ke User
-* [ ] Generate JWT access tokens
 * [ ] JWT middleware untuk protected routes
 * [ ] Endpoint “Get Current User”
 * [ ] Role-based access (user, admin)

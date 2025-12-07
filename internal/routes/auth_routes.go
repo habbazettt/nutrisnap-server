@@ -9,12 +9,12 @@ import (
 func SetupAuthRoutes(v1 fiber.Router, authController *controllers.AuthController) {
 	auth := v1.Group("/auth")
 
-	// Registration
+	// Authentication
 	auth.Post("/register", authController.Register)
+	auth.Post("/login", authController.Login)
 
 	// Will be implemented next
-	// auth.Post("/login", container.AuthController.Login)
-	// auth.Post("/oauth/google", container.AuthController.GoogleOAuth)
-	// auth.Post("/refresh", container.AuthController.RefreshToken)
-	// auth.Post("/logout", container.AuthController.Logout)
+	// auth.Post("/oauth/google", authController.GoogleOAuth)
+	// auth.Post("/refresh", authController.RefreshToken)
+	// auth.Post("/logout", authController.Logout)
 }

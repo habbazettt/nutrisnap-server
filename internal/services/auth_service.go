@@ -7,6 +7,7 @@ import (
 	"github.com/habbazettt/nutrisnap-server/internal/models"
 	"github.com/habbazettt/nutrisnap-server/internal/repositories"
 	"github.com/habbazettt/nutrisnap-server/pkg/constants"
+	"github.com/habbazettt/nutrisnap-server/pkg/jwt"
 )
 
 var (
@@ -17,14 +18,19 @@ var (
 
 type AuthService interface {
 	Register(req *dto.RegisterRequest) (*dto.RegisterResponse, error)
+	Login(req *dto.LoginRequest) (*dto.LoginResponse, error)
 }
 
 type authService struct {
-	userRepo repositories.UserRepository
+	userRepo   repositories.UserRepository
+	jwtManager *jwt.Manager
 }
 
-func NewAuthService(userRepo repositories.UserRepository) AuthService {
-	return &authService{userRepo: userRepo}
+func NewAuthService(userRepo repositories.UserRepository, jwtManager *jwt.Manager) AuthService {
+	return &authService{
+		userRepo:   userRepo,
+		jwtManager: jwtManager,
+	}
 }
 
 func (s *authService) Register(req *dto.RegisterRequest) (*dto.RegisterResponse, error) {
@@ -58,6 +64,45 @@ func (s *authService) Register(req *dto.RegisterRequest) (*dto.RegisterResponse,
 	return &dto.RegisterResponse{
 		User:    s.toUserResponse(user),
 		Message: constants.GetStatusMessage(constants.StatusCreated),
+	}, nil
+}
+
+func (s *authService) Login(req *dto.LoginRequest) (*dto.LoginResponse, error) {
+	// Find user by email
+	user, err := s.userRepo.FindByEmail(req.Email)
+	if err != nil {
+		if errors.Is(err, repositories.ErrUserNotFound) {
+			return nil, ErrInvalidCredentials
+		}
+		return nil, err
+	}
+
+	// Verify password
+	if !user.CheckPassword(req.Password) {
+		return nil, ErrInvalidCredentials
+	}
+
+	// Generate access token
+	accessToken, expiresAt, err := s.jwtManager.GenerateAccessToken(
+		user.ID.String(),
+		user.Email,
+		string(user.Role),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Generate refresh token
+	refreshToken, _, err := s.jwtManager.GenerateRefreshToken(user.ID.String())
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.LoginResponse{
+		User:         s.toUserResponse(user),
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		ExpiresAt:    expiresAt,
 	}, nil
 }
 

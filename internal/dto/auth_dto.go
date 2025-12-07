@@ -47,3 +47,11 @@ type RegisterResponse struct {
 	User    UserResponse `json:"user"`
 	Message string       `json:"message" example:"Registration successful. Please verify your email."`
 }
+
+// LoginResponse represents the login response with JWT tokens
+type LoginResponse struct {
+	User         UserResponse `json:"user"`
+	AccessToken  string       `json:"access_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
+	RefreshToken string       `json:"refresh_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
+	ExpiresAt    time.Time    `json:"expires_at"`
+}
