@@ -9,6 +9,7 @@ import (
 	"github.com/habbazettt/nutrisnap-server/internal/middleware"
 	"github.com/habbazettt/nutrisnap-server/internal/routes"
 	"github.com/habbazettt/nutrisnap-server/pkg/logger"
+	"github.com/habbazettt/nutrisnap-server/pkg/response"
 )
 
 func main() {
@@ -75,11 +76,5 @@ func customErrorHandler(c *fiber.Ctx, err error) error {
 		"path", c.Path(),
 	)
 
-	return c.Status(code).JSON(fiber.Map{
-		"success": false,
-		"error": fiber.Map{
-			"code":    code,
-			"message": err.Error(),
-		},
-	})
+	return response.Error(c, code, err.Error())
 }

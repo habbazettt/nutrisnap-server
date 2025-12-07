@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/habbazettt/nutrisnap-server/internal/controllers"
+	"github.com/habbazettt/nutrisnap-server/pkg/response"
 )
 
 // SetupRoutes initializes all routes for the application
@@ -38,12 +39,6 @@ func SetupRoutes(app *fiber.App) {
 
 	// 404 Handler
 	app.Use(func(c *fiber.Ctx) error {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"success": false,
-			"error": fiber.Map{
-				"code":    404,
-				"message": "Route not found",
-			},
-		})
+		return response.NotFound(c, "Route not found")
 	})
 }
