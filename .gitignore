@@ -51,3 +51,6 @@ temp/
 # Debug files
 debug
 *.debug
+
+# Google OAuth Key
+oauth_key.json

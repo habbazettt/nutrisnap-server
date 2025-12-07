@@ -32,7 +32,10 @@ func main() {
 	bootstrap.InitLogger(cfg)
 	bootstrap.InitDatabase(cfg)
 
-	app := bootstrap.NewApp()
+	// Initialize dependency injection container
+	container := bootstrap.NewContainer()
+
+	app := bootstrap.NewApp(container)
 
 	go startServer(app, cfg.Server.Port)
 

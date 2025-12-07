@@ -2,11 +2,17 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/habbazettt/nutrisnap-server/internal/controllers"
 	"github.com/habbazettt/nutrisnap-server/pkg/response"
 )
 
+// Container defines the interface for dependency injection
+type Container interface {
+	GetAuthController() *controllers.AuthController
+}
+
 // SetupRoutes is the main registry that registers all routes
-func SetupRoutes(app *fiber.App) {
+func SetupRoutes(app *fiber.App, container Container) {
 	// Metrics (before other routes for middleware)
 	SetupMetricsRoutes(app)
 
@@ -17,7 +23,7 @@ func SetupRoutes(app *fiber.App) {
 	// Register all route groups
 	SetupHealthRoutes(app, v1)
 	SetupDocsRoutes(app)
-	SetupAuthRoutes(v1)
+	SetupAuthRoutes(v1, container.GetAuthController())
 	SetupScanRoutes(v1)
 	SetupProductRoutes(v1)
 	SetupCompareRoutes(v1)

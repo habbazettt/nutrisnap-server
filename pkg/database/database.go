@@ -81,3 +81,8 @@ func Close() error {
 	}
 	return nil
 }
+
+// GetDB returns the global database instance
+func GetDB() *gorm.DB {
+	return DB
+}

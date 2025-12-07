@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserRole string
@@ -38,6 +39,26 @@ func (u *User) IsAdmin() bool {
 
 func (u *User) HasPassword() bool {
 	return u.PasswordHash != nil && *u.PasswordHash != ""
+}
+
+// SetPassword hashes and sets the user password
+func (u *User) SetPassword(password string) error {
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	hashStr := string(hash)
+	u.PasswordHash = &hashStr
+	return nil
+}
+
+// CheckPassword verifies a password against the stored hash
+func (u *User) CheckPassword(password string) bool {
+	if u.PasswordHash == nil {
+		return false
+	}
+	err := bcrypt.CompareHashAndPassword([]byte(*u.PasswordHash), []byte(password))
+	return err == nil
 }
 
 type CreateUserInput struct {

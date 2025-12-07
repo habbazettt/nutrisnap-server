@@ -10,14 +10,14 @@ import (
 	"github.com/habbazettt/nutrisnap-server/pkg/response"
 )
 
-func NewApp() *fiber.App {
+func NewApp(container *Container) *fiber.App {
 	app := fiber.New(fiber.Config{
 		AppName:      "NutriSnap API v1.0.0",
 		ErrorHandler: errorHandler,
 	})
 
 	setupMiddleware(app)
-	routes.SetupRoutes(app)
+	routes.SetupRoutes(app, container)
 
 	return app
 }
