@@ -13,7 +13,7 @@ Tujuan: membangun fondasi backend yang stabil, modular, aman, dan siap mensuppor
 
 * [x] Setup repository & struktur proyek (Go + Fiber)
 * [x] Setup readme & license
-* [ ] Setup Docker Compose (App, PostgreSQL, Adminer, MinIO, Tesseract runtime)
+* [x] Setup Docker Compose (App, PostgreSQL, Adminer, MinIO, Tesseract runtime)
 * [ ] Tambahkan `.env.example` dan config loader
 * [ ] Setup structured logging (Zap)
 * [ ] Tambahkan rate limiting middleware
