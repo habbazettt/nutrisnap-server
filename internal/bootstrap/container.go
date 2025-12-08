@@ -80,6 +80,7 @@ func NewContainer() *Container {
 	// Initialize MinIO storage client
 	storageClient, err := storage.NewClient(storage.Config{
 		Endpoint:  cfg.MinIO.Endpoint,
+		PublicURL: cfg.MinIO.PublicURL,
 		AccessKey: cfg.MinIO.AccessKey,
 		SecretKey: cfg.MinIO.SecretKey,
 		Bucket:    cfg.MinIO.Bucket,

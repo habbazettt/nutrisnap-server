@@ -14,6 +14,7 @@ import (
 // Config holds MinIO configuration
 type Config struct {
 	Endpoint  string
+	PublicURL string // External URL for presigned URLs (e.g., http://localhost:9010)
 	AccessKey string
 	SecretKey string
 	Bucket    string
@@ -22,8 +23,10 @@ type Config struct {
 
 // Client wraps MinIO client operations
 type Client struct {
-	client *minio.Client
-	bucket string
+	client    *minio.Client
+	bucket    string
+	endpoint  string
+	publicURL string
 }
 
 // NewClient creates a new MinIO storage client
@@ -37,8 +40,10 @@ func NewClient(cfg Config) (*Client, error) {
 	}
 
 	return &Client{
-		client: client,
-		bucket: cfg.Bucket,
+		client:    client,
+		bucket:    cfg.Bucket,
+		endpoint:  cfg.Endpoint,
+		publicURL: cfg.PublicURL,
 	}, nil
 }
 
@@ -103,7 +108,23 @@ func (c *Client) GetPresignedURL(ctx context.Context, objectName string, expiry 
 		return "", fmt.Errorf("failed to generate presigned URL: %w", err)
 	}
 
-	return presignedURL.String(), nil
+	urlStr := presignedURL.String()
+
+	// Rewrite URL to use public endpoint if configured
+	if c.publicURL != "" {
+		// Parse the presigned URL to get just the path and query
+		parsedURL, err := url.Parse(urlStr)
+		if err == nil {
+			// Build new URL with public base and original path+query
+			newURL := c.publicURL + parsedURL.Path
+			if parsedURL.RawQuery != "" {
+				newURL += "?" + parsedURL.RawQuery
+			}
+			urlStr = newURL
+		}
+	}
+
+	return urlStr, nil
 }
 
 // ObjectExists checks if an object exists in the bucket

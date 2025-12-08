@@ -33,6 +33,7 @@ type DatabaseConfig struct {
 
 type MinIOConfig struct {
 	Endpoint    string
+	PublicURL   string // External URL for presigned URLs (e.g., http://localhost:9010)
 	AccessKey   string
 	SecretKey   string
 	Bucket      string
@@ -74,6 +75,7 @@ func Load() (*Config, error) {
 		},
 		MinIO: MinIOConfig{
 			Endpoint:    getEnv("MINIO_ENDPOINT", ""),
+			PublicURL:   getEnv("MINIO_PUBLIC_URL", ""), // If empty, will use Endpoint
 			AccessKey:   getEnv("MINIO_ACCESS_KEY", ""),
 			SecretKey:   getEnv("MINIO_SECRET_KEY", ""),
 			Bucket:      getEnv("MINIO_BUCKET", "nutrisnap"),
