@@ -67,7 +67,7 @@ func (s *scanService) CreateScan(ctx context.Context, userID string, file io.Rea
 		objectName := fmt.Sprintf("scans/%s/%s%s", userID, uuid.New().String(), ext)
 
 		// Upload to MinIO
-		_, err := s.storageClient.Upload(ctx, objectName, file, fileSize, contentType)
+		err := s.storageClient.Upload(ctx, objectName, file, fileSize, contentType)
 		if err != nil {
 			return nil, fmt.Errorf("failed to upload image: %w", err)
 		}
