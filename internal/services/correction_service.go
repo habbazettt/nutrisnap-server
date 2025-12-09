@@ -56,7 +56,7 @@ func (s *correctionService) CreateCorrection(ctx context.Context, scanID, userID
 		FieldName:      fieldName,
 		OriginalValue:  originalValue,
 		CorrectedValue: correctedValue,
-		Status:         models.CorrectionStatusPending,
+		Status:         models.CorrectionStatusApproved,
 	}
 
 	if err := s.correctionRepo.Create(correction); err != nil {
