@@ -32,13 +32,13 @@ func DefaultCleanupConfig() CleanupConfig {
 type CleanupJob struct {
 	config        CleanupConfig
 	scanRepo      repositories.ScanRepository
-	storageClient *storage.Client
+	storageClient *storage.CloudinaryClient
 	stopChan      chan struct{}
 	isRunning     bool
 }
 
 // NewCleanupJob creates a new cleanup job
-func NewCleanupJob(config CleanupConfig, scanRepo repositories.ScanRepository, storageClient *storage.Client) *CleanupJob {
+func NewCleanupJob(config CleanupConfig, scanRepo repositories.ScanRepository, storageClient *storage.CloudinaryClient) *CleanupJob {
 	return &CleanupJob{
 		config:        config,
 		scanRepo:      scanRepo,
@@ -111,7 +111,7 @@ func (j *CleanupJob) runCleanup() {
 			continue
 		}
 
-		// Delete image from MinIO
+		// Delete image from Cloudinary
 		if err := j.storageClient.Delete(ctx, *scan.ImageRef); err != nil {
 			log.Printf("Failed to delete image %s: %v", *scan.ImageRef, err)
 			failedCount++

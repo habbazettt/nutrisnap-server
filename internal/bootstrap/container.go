@@ -1,7 +1,6 @@
 package bootstrap
 
 import (
-	"context"
 	"log"
 
 	"github.com/habbazettt/nutrisnap-server/config"
@@ -25,7 +24,7 @@ type Container struct {
 	GoogleOAuth *oauth.GoogleOAuth
 
 	// Storage
-	StorageClient *storage.Client
+	StorageClient *storage.CloudinaryClient
 
 	// External APIs
 	OFFClient *openfoodfacts.Client
@@ -77,22 +76,16 @@ func NewContainer() *Container {
 		RedirectURL:  cfg.Google.RedirectURL,
 	})
 
-	// Initialize MinIO storage client
-	storageClient, err := storage.NewClient(storage.Config{
-		Endpoint:  cfg.MinIO.Endpoint,
-		PublicURL: cfg.MinIO.PublicURL,
-		AccessKey: cfg.MinIO.AccessKey,
-		SecretKey: cfg.MinIO.SecretKey,
-		Bucket:    cfg.MinIO.Bucket,
-		UseSSL:    cfg.MinIO.UseSSL,
+	// Initialize Cloudinary storage client
+	storageClient, err := storage.NewCloudinaryClient(storage.CloudinaryConfig{
+		CloudName: cfg.Cloudinary.CloudName,
+		APIKey:    cfg.Cloudinary.APIKey,
+		APISecret: cfg.Cloudinary.APISecret,
+		URL:       cfg.Cloudinary.URL,
+		Folder:    cfg.Cloudinary.Folder,
 	})
 	if err != nil {
-		log.Printf("Warning: Failed to initialize storage client: %v", err)
-	} else {
-		// Ensure bucket exists
-		if err := storageClient.EnsureBucket(context.Background()); err != nil {
-			log.Printf("Warning: Failed to ensure bucket: %v", err)
-		}
+		log.Printf("Warning: Failed to initialize Cloudinary storage client: %v", err)
 	}
 
 	// Initialize OpenFoodFacts client

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"path/filepath"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/habbazettt/nutrisnap-server/internal/dto"
@@ -28,19 +27,17 @@ type ScanQueue interface {
 
 type scanService struct {
 	scanRepo       repositories.ScanRepository
-	storageClient  *storage.Client
+	storageClient  *storage.CloudinaryClient
 	productService ProductService
 	scanQueue      ScanQueue
-	presignExpiry  time.Duration
 }
 
-func NewScanService(scanRepo repositories.ScanRepository, storageClient *storage.Client, productService ProductService, scanQueue ScanQueue) ScanService {
+func NewScanService(scanRepo repositories.ScanRepository, storageClient *storage.CloudinaryClient, productService ProductService, scanQueue ScanQueue) ScanService {
 	return &scanService{
 		scanRepo:       scanRepo,
 		storageClient:  storageClient,
 		productService: productService,
 		scanQueue:      scanQueue,
-		presignExpiry:  15 * time.Minute,
 	}
 }
 
@@ -59,21 +56,22 @@ func (s *scanService) CreateScan(ctx context.Context, userID string, file io.Rea
 		ImageStored: storeImage,
 	}
 
-	// Upload image to MinIO if storeImage is true
-	var imageRef *string
+	// Upload image to Cloudinary if storeImage is true
+	// ImageRef now stores the public Cloudinary URL directly
+	var imageURL *string
 	if storeImage && file != nil {
 		// Generate unique object name
 		ext := filepath.Ext(filename)
 		objectName := fmt.Sprintf("scans/%s/%s%s", userID, uuid.New().String(), ext)
 
-		// Upload to MinIO
-		err := s.storageClient.Upload(ctx, objectName, file, fileSize, contentType)
+		// Upload to Cloudinary - returns public URL directly
+		url, err := s.storageClient.Upload(ctx, objectName, file, fileSize, contentType)
 		if err != nil {
 			return nil, fmt.Errorf("failed to upload image: %w", err)
 		}
 
-		imageRef = &objectName
-		scan.ImageRef = imageRef
+		imageURL = &url
+		scan.ImageRef = imageURL // Store the full Cloudinary URL
 	}
 
 	// Fast-Path: If barcode is provided, try to find product immediately
@@ -102,15 +100,6 @@ func (s *scanService) CreateScan(ctx context.Context, userID string, file io.Rea
 		}
 	}
 
-	// Generate presigned URL if image was stored
-	var imageURL *string
-	if imageRef != nil {
-		url, err := s.storageClient.GetPresignedURL(ctx, *imageRef, s.presignExpiry)
-		if err == nil {
-			imageURL = &url
-		}
-	}
-
 	return &dto.ScanUploadResponse{
 		ID:        scan.ID.String(),
 		Status:    scan.Status,
@@ -126,16 +115,9 @@ func (s *scanService) GetScanByID(ctx context.Context, id string) (*dto.ScanResp
 		return nil, err
 	}
 
-	// Generate presigned URL if image exists
-	var imageURL *string
-	if scan.ImageRef != nil && scan.ImageStored {
-		url, err := s.storageClient.GetPresignedURL(ctx, *scan.ImageRef, s.presignExpiry)
-		if err == nil {
-			imageURL = &url
-		}
-	}
-
-	resp := dto.ToScanResponse(scan, imageURL)
+	// ImageRef now stores the full Cloudinary URL directly
+	// No presigned URL generation needed
+	resp := dto.ToScanResponse(scan, scan.ImageRef)
 	return &resp, nil
 }
 
@@ -148,14 +130,8 @@ func (s *scanService) GetUserScans(ctx context.Context, userID string, page, lim
 
 	scanResponses := make([]dto.ScanResponse, len(scans))
 	for i, scan := range scans {
-		var imageURL *string
-		if scan.ImageRef != nil && scan.ImageStored {
-			url, err := s.storageClient.GetPresignedURL(ctx, *scan.ImageRef, s.presignExpiry)
-			if err == nil {
-				imageURL = &url
-			}
-		}
-		scanResponses[i] = dto.ToScanResponse(&scan, imageURL)
+		// ImageRef now stores the full Cloudinary URL directly
+		scanResponses[i] = dto.ToScanResponse(&scan, scan.ImageRef)
 	}
 
 	totalPages := int(total) / limit
@@ -184,11 +160,11 @@ func (s *scanService) DeleteScan(ctx context.Context, id string, userID string) 
 		return fmt.Errorf("unauthorized: scan does not belong to user")
 	}
 
-	// Delete image from MinIO if exists
+	// Delete image from Cloudinary if exists
 	if scan.ImageRef != nil && scan.ImageStored {
 		if err := s.storageClient.Delete(ctx, *scan.ImageRef); err != nil {
 			// Log error but continue with deletion
-			fmt.Printf("Warning: failed to delete image from storage: %v\n", err)
+			fmt.Printf("Warning: failed to delete image from Cloudinary: %v\n", err)
 		}
 	}
 
@@ -206,5 +182,6 @@ func (s *scanService) GetScanImageURL(ctx context.Context, scanID string) (strin
 		return "", fmt.Errorf("no image stored for this scan")
 	}
 
-	return s.storageClient.GetPresignedURL(ctx, *scan.ImageRef, s.presignExpiry)
+	// ImageRef is already the public Cloudinary URL
+	return *scan.ImageRef, nil
 }

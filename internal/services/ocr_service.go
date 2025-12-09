@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"path/filepath"
 
@@ -15,21 +16,32 @@ import (
 )
 
 type OCRService interface {
-	ProcessImageFromStorage(ctx context.Context, objectName string) (*models.Nutrients, string, string, error)
+	ProcessImageFromStorage(ctx context.Context, imageURL string) (*models.Nutrients, string, string, error)
 }
 
 type ocrService struct {
-	storageClient *storage.Client
+	storageClient *storage.CloudinaryClient
 }
 
-func NewOCRService(storageClient *storage.Client) OCRService {
+func NewOCRService(storageClient *storage.CloudinaryClient) OCRService {
 	return &ocrService{
 		storageClient: storageClient,
 	}
 }
 
-func (s *ocrService) ProcessImageFromStorage(ctx context.Context, objectName string) (*models.Nutrients, string, string, error) {
-	tmpFile := filepath.Join(os.TempDir(), fmt.Sprintf("ocr-%s%s", uuid.New().String(), filepath.Ext(objectName)))
+// ProcessImageFromStorage downloads image from Cloudinary URL and performs OCR
+func (s *ocrService) ProcessImageFromStorage(ctx context.Context, imageURL string) (*models.Nutrients, string, string, error) {
+	// Parse URL to get file extension
+	parsedURL, err := url.Parse(imageURL)
+	if err != nil {
+		return nil, "", "", fmt.Errorf("invalid image URL: %w", err)
+	}
+	ext := filepath.Ext(parsedURL.Path)
+	if ext == "" {
+		ext = ".jpg"
+	}
+
+	tmpFile := filepath.Join(os.TempDir(), fmt.Sprintf("ocr-%s%s", uuid.New().String(), ext))
 
 	// Create temp file
 	file, err := os.Create(tmpFile)
@@ -41,10 +53,10 @@ func (s *ocrService) ProcessImageFromStorage(ctx context.Context, objectName str
 		os.Remove(tmpFile) // Clean up
 	}()
 
-	// Download content
-	reader, err := s.storageClient.Download(ctx, objectName)
+	// Download from Cloudinary URL
+	reader, err := s.storageClient.Download(ctx, imageURL)
 	if err != nil {
-		return nil, "", "", fmt.Errorf("failed to get image from storage: %w", err)
+		return nil, "", "", fmt.Errorf("failed to get image from Cloudinary: %w", err)
 	}
 	defer reader.Close()
 

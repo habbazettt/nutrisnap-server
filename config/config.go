@@ -3,16 +3,23 @@ package config
 import (
 	"errors"
 	"os"
-	"strconv"
 	"time"
 )
 
 type Config struct {
-	Server   ServerConfig
-	Database DatabaseConfig
-	MinIO    MinIOConfig
-	JWT      JWTConfig
-	Google   GoogleOAuthConfig
+	Server     ServerConfig
+	Database   DatabaseConfig
+	JWT        JWTConfig
+	Google     GoogleOAuthConfig
+	Cloudinary CloudinaryConfig
+}
+
+type CloudinaryConfig struct {
+	CloudName string
+	APIKey    string
+	APISecret string
+	URL       string
+	Folder    string
 }
 
 type ServerConfig struct {
@@ -29,17 +36,6 @@ type DatabaseConfig struct {
 	Password string
 	DBName   string
 	SSLMode  string
-}
-
-type MinIOConfig struct {
-	Endpoint    string
-	PublicURL   string // External URL for presigned URLs (e.g., http://localhost:9010)
-	AccessKey   string
-	SecretKey   string
-	Bucket      string
-	UseSSL      bool
-	APIPort     string
-	ConsolePort string
 }
 
 type JWTConfig struct {
@@ -73,15 +69,12 @@ func Load() (*Config, error) {
 			DBName:   getEnv("DB_NAME", ""),
 			SSLMode:  getEnv("DB_SSLMODE", "disable"),
 		},
-		MinIO: MinIOConfig{
-			Endpoint:    getEnv("MINIO_ENDPOINT", ""),
-			PublicURL:   getEnv("MINIO_PUBLIC_URL", ""), // If empty, will use Endpoint
-			AccessKey:   getEnv("MINIO_ACCESS_KEY", ""),
-			SecretKey:   getEnv("MINIO_SECRET_KEY", ""),
-			Bucket:      getEnv("MINIO_BUCKET", "nutrisnap"),
-			UseSSL:      getEnvBool("MINIO_USE_SSL", false),
-			APIPort:     getEnv("MINIO_API_PORT", "9010"),
-			ConsolePort: getEnv("MINIO_CONSOLE_PORT", "9011"),
+		Cloudinary: CloudinaryConfig{
+			CloudName: getEnv("CLOUDINARY_CLOUD_NAME", ""),
+			APIKey:    getEnv("CLOUDINARY_API_KEY", ""),
+			APISecret: getEnv("CLOUDINARY_API_SECRET", ""),
+			URL:       getEnv("CLOUDINARY_URL", ""),
+			Folder:    getEnv("CLOUDINARY_FOLDER", "nutrisnap"),
 		},
 		JWT: JWTConfig{
 			Secret:        getEnv("JWT_SECRET", "nutrisnap-secret-key-change-in-production"),
@@ -135,17 +128,6 @@ func (c *Config) IsProduction() bool {
 func getEnv(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
 		return value
-	}
-	return defaultValue
-}
-
-func getEnvBool(key string, defaultValue bool) bool {
-	if value := os.Getenv(key); value != "" {
-		parsed, err := strconv.ParseBool(value)
-		if err != nil {
-			return defaultValue
-		}
-		return parsed
 	}
 	return defaultValue
 }
