@@ -11,7 +11,7 @@ Backend API untuk **NutriSnap** - platform yang memproses foto nutrition facts a
 | **Language** | Go 1.24+ |
 | **Framework** | Fiber v2 |
 | **Database** | PostgreSQL 15 + GORM |
-| **Storage** | MinIO (S3-compatible) |
+| **Storage** | Cloudinary (Image CDN) |
 | **OCR** | Tesseract |
 | **Docs** | Swagger/OpenAPI |
 | **Monitoring** | Prometheus + Grafana |
@@ -40,7 +40,7 @@ nutrisnap-server/
 │   ├── database/             # Database connection
 │   ├── jwt/                  # JWT token management
 │   ├── oauth/                # OAuth providers
-│   ├── storage/              # MinIO client
+│   ├── storage/              # Cloudinary client
 │   ├── logger/               # Structured logging
 │   └── response/             # API response helpers
 └── docker-compose.yml
@@ -134,7 +134,6 @@ go run ./cmd/api/main.go
 | **app** | 3000 | NutriSnap API |
 | **postgres** | 5432 | PostgreSQL 15 |
 | **adminer** | 8080 | Database UI |
-| **minio** | 9010, 9011 | Object Storage |
 | **prometheus** | 9090 | Metrics Collection |
 | **grafana** | 3001 | Metrics Dashboard |
 
@@ -146,7 +145,6 @@ go run ./cmd/api/main.go
 | Swagger Docs | <http://localhost:3000/docs> |
 | Metrics | <http://localhost:3000/metrics> |
 | Adminer | <http://localhost:8080> |
-| MinIO Console | <http://localhost:9011> |
 | Prometheus | <http://localhost:9090> |
 | Grafana | <http://localhost:3001> |
 
@@ -162,9 +160,10 @@ go run ./cmd/api/main.go
 | `DB_USER` | PostgreSQL user |
 | `DB_PASSWORD` | PostgreSQL password |
 | `DB_NAME` | PostgreSQL database |
-| `MINIO_ENDPOINT` | MinIO endpoint |
-| `MINIO_ACCESS_KEY` | MinIO access key |
-| `MINIO_SECRET_KEY` | MinIO secret key |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary Cloud Name |
+| `CLOUDINARY_API_KEY` | Cloudinary API Key |
+| `CLOUDINARY_API_SECRET` | Cloudinary API Secret |
+| `CLOUDINARY_URL` | Cloudinary Connection URL |
 | `JWT_SECRET` | JWT signing secret |
 | `JWT_ACCESS_EXPIRY` | Access token expiry (e.g., 30m) |
 | `JWT_REFRESH_EXPIRY` | Refresh token expiry (e.g., 168h) |
@@ -177,8 +176,9 @@ go run ./cmd/api/main.go
 - ✅ JWT Authentication (Access + Refresh tokens)
 - ✅ Google OAuth2 Login
 - ✅ Role-based Access Control (User/Admin)
-- ✅ Image Upload to MinIO
-- ✅ Presigned URLs for secure image access
+- ✅ Admin Dashboard APIs (Stats, User Management)
+- ✅ Image Upload to Cloudinary
+- ✅ Product Comparison Logic
 - ✅ Structured logging with slog
 - ✅ Rate limiting (100 req/min default)
 - ✅ API response envelope
